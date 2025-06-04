@@ -19,21 +19,54 @@ const Footer = () => {
     setSubscriptionStatus('');
 
     try {
-      // Simulate API call - replace with your actual newsletter service
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Google Apps Script Web App URL - using GET method to avoid CORS issues
+      const webAppUrl = 'https://script.google.com/macros/s/AKfycbwKd60rA8qJrWm2VLZ1tCzjK6rp3Piia63GPac5wGd3DVdFbO6ERKjiBqGZVc8wzf25/exec';
       
-      // For now, we'll just show a success message
-      setSubscriptionStatus('Thank you for subscribing! 🎉');
-      setEmail('');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSubscriptionStatus('');
-      }, 3000);
+      // Use GET request with email as parameter (works better with Google Apps Script)
+      const response = await fetch(`${webAppUrl}?email=${encodeURIComponent(email)}`, {
+        method: 'GET',
+        mode: 'cors'
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSubscriptionStatus('Thank you for subscribing! 🎉');
+        setEmail('');
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          setSubscriptionStatus('');
+        }, 3000);
+      } else {
+        setSubscriptionStatus(result.message || 'Something went wrong. Please try again.');
+      }
       
     } catch (error) {
       console.error('Newsletter subscription error:', error);
-      setSubscriptionStatus('Something went wrong. Please try again.');
+      
+      // Fallback: Try with no-cors mode
+      try {
+        const webAppUrl = 'https://script.google.com/macros/s/AKfycbwKd60rA8qJrWm2VLZ1tCzjK6rp3Piia63GPac5wGd3DVdFbO6ERKjiBqGZVc8wzf25/exec';
+        
+        await fetch(`${webAppUrl}?email=${encodeURIComponent(email)}`, {
+          method: 'GET',
+          mode: 'no-cors'
+        });
+
+        // Since no-cors mode doesn't allow reading the response,
+        // we'll assume success if no error was thrown
+        setSubscriptionStatus('Thank you for subscribing! 🎉');
+        setEmail('');
+        
+        setTimeout(() => {
+          setSubscriptionStatus('');
+        }, 3000);
+        
+      } catch (fallbackError) {
+        console.error('Fallback subscription error:', fallbackError);
+        setSubscriptionStatus('Something went wrong. Please try again.');
+      }
     } finally {
       setIsSubscribing(false);
     }
