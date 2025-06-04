@@ -7,23 +7,15 @@ export default defineConfig({
   build: {
     // Optimize for Netlify
     outDir: 'dist',
-    sourcemap: false, // Disable sourcemaps for production
+    sourcemap: false,
     rollupOptions: {
       output: {
         // Split chunks for better caching
         manualChunks: {
           vendor: ['react', 'react-dom'],
           motion: ['framer-motion'],
-          utils: ['lucide-react', 'react-scroll', 'react-helmet-async']
+          utils: ['lucide-react', 'react-scroll']
         }
-      }
-    },
-    // Optimize bundle size
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console.logs in production
-        drop_debugger: true
       }
     }
   },
