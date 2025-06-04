@@ -1,7 +1,44 @@
 import { motion } from 'framer-motion';
 import { Heart, MapPin, Phone, Mail, Clock, Instagram, Facebook, Twitter, Star } from 'lucide-react';
+import { useState } from 'react';
 
 const Footer = () => {
+  const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState('');
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !email.includes('@')) {
+      setSubscriptionStatus('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubscribing(true);
+    setSubscriptionStatus('');
+
+    try {
+      // Simulate API call - replace with your actual newsletter service
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For now, we'll just show a success message
+      setSubscriptionStatus('Thank you for subscribing! 🎉');
+      setEmail('');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSubscriptionStatus('');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      setSubscriptionStatus('Something went wrong. Please try again.');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   const socialLinks = [
     { icon: Instagram, href: "#", label: "Instagram" },
     { icon: Facebook, href: "#", label: "Facebook" },
@@ -64,7 +101,7 @@ const Footer = () => {
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <MapPin className="w-5 h-5 text-amber-400" />
-                  <span>123 Main Street, Williams Lake, BC V2G 1A1</span>
+                  <span>275 B Clearview Crescent #112, Williams Lake, BC V2G 4H6</span>
                 </motion.div>
                 
                 <motion.div 
@@ -244,20 +281,42 @@ const Footer = () => {
                 Subscribe to our newsletter for exclusive offers and new menu updates
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400/60 focus:bg-white/15 transition-all duration-300"
-                />
-                <motion.button
-                  className="px-6 py-3 bg-gradient-to-r from-amber-400 to-orange-500 text-black font-medium rounded-full hover:from-orange-500 hover:to-red-500 transition-all duration-300 shadow-lg"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Subscribe
-                </motion.button>
-              </div>
+              <form onSubmit={handleSubscribe} className="max-w-md mx-auto">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="flex-1 px-4 py-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400/60 focus:bg-white/15 transition-all duration-300"
+                    disabled={isSubscribing}
+                  />
+                  <motion.button
+                    type="submit"
+                    disabled={isSubscribing}
+                    className="px-6 py-3 bg-gradient-to-r from-amber-400 to-orange-500 text-black font-medium rounded-full hover:from-orange-500 hover:to-red-500 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={!isSubscribing ? { scale: 1.05 } : {}}
+                    whileTap={!isSubscribing ? { scale: 0.95 } : {}}
+                  >
+                    {isSubscribing ? 'Subscribing...' : 'Subscribe'}
+                  </motion.button>
+                </div>
+                
+                {/* Status Message */}
+                {subscriptionStatus && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`mt-3 text-sm ${
+                      subscriptionStatus.includes('Thank you') 
+                        ? 'text-green-400' 
+                        : 'text-red-400'
+                    }`}
+                  >
+                    {subscriptionStatus}
+                  </motion.div>
+                )}
+              </form>
             </div>
           </div>
         </motion.div>

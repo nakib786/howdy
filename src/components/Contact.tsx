@@ -11,7 +11,7 @@ const Contact = () => {
     {
       icon: MapPin,
       title: 'Address',
-      details: ['123 Main Street', 'Williams Lake, BC V2G 1A1'],
+      details: ['275 B Clearview Crescent #112', 'Williams Lake, BC V2G 4H6'],
     },
     {
       icon: Phone,
@@ -121,7 +121,7 @@ const Contact = () => {
           >
             <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-lg h-96">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2396.5!2d-122.1419!3d52.1332!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTLCsDA3JzU5LjUiTiAxMjLCsDA4JzMwLjgiVw!5e0!3m2!1sen!2sca!4v1234567890"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2396.5!2d-122.130203!3d52.128429!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s275%20B%20Clearview%20Crescent%20%23112%2C%20Williams%20Lake%2C%20BC%20V2G%204H6!5e0!3m2!1sen!2sca!4v1234567890"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

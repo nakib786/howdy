@@ -46,10 +46,10 @@ function App() {
           "description": "Pakistani-Canadian fusion restaurant in Williams Lake, BC",
           "address": {
             "@type": "PostalAddress",
-            "streetAddress": "123 Main Street",
+            "streetAddress": "275 B Clearview Crescent #112",
             "addressLocality": "Williams Lake",
             "addressRegion": "BC",
-            "postalCode": "V2G 1A1",
+            "postalCode": "V2G 4H6",
             "addressCountry": "CA"
           },
           "telephone": "+1-250-392-3663",

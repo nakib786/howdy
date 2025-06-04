@@ -421,7 +421,7 @@ const Hero = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 2.2 }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 w-full flex justify-center"
+        className="absolute bottom-8 left-0 right-0 z-20 flex justify-center"
       >
         <Link to="about" smooth={true} duration={800} className="cursor-pointer group">
           <motion.div
@@ -429,11 +429,11 @@ const Hero = () => {
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
-            <div className="mb-3 text-xs font-light tracking-widest uppercase text-center w-full">
+            <div className="mb-3 text-xs font-light tracking-widest uppercase text-center">
               Discover More
             </div>
             <motion.div
-              className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center mx-auto"
+              className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
               whileHover={{ borderColor: "rgba(251, 191, 36, 0.6)" }}
             >
               <motion.div
