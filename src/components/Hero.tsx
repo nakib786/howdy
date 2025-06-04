@@ -429,7 +429,7 @@ const Hero = () => {
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
-            <div className="mb-3 text-xs font-light tracking-widest uppercase">
+            <div className="mb-3 text-xs font-light tracking-widest uppercase text-center">
               Discover More
             </div>
             <motion.div
