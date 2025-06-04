@@ -11,6 +11,7 @@ const HalalLogo = ({ className = "w-4 h-4" }: { className?: string }) => (
   >
     <circle cx="303.5" cy="303.5" r="303.5" fill="#00A651"/>
     <path d="M303.5 50C162.5 50 50 162.5 50 303.5S162.5 557 303.5 557 557 444.5 557 303.5 444.5 50 303.5 50zm0 457C187.5 507 100 419.5 100 303.5S187.5 100 303.5 100 507 187.5 507 303.5 419.5 507 303.5 507z" fill="white"/>
+    <path d="M303.5 50C162.5 50 50 162.5 50 303.5S162.5 557 303.5 557 557 444.5 557 303.5 444.5 50 303.5 50zm0 457C187.5 507 100 419.5 100 303.5S187.5 100 303.5 100 507 187.5 507 303.5 419.5 507 303.5 507z" fill="white"/>
     <text x="303.5" y="330" textAnchor="middle" fontSize="120" fontFamily="Arial, sans-serif" fontWeight="bold" fill="white">حلال</text>
     <text x="303.5" y="380" textAnchor="middle" fontSize="40" fontFamily="Arial, sans-serif" fontWeight="bold" fill="white">HALAL</text>
   </svg>
@@ -18,19 +19,29 @@ const HalalLogo = ({ className = "w-4 h-4" }: { className?: string }) => (
 
 const Menu = () => {
   const ref = useRef(null);
+  const menuSectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [activeCategory, setActiveCategory] = useState('fusion');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showStickyMobileMenu, setShowStickyMobileMenu] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
+  const [isInMenuSection, setIsInMenuSection] = useState(false);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
 
   // Handle sticky behavior for mobile dropdown
   useEffect(() => {
     const handleScroll = () => {
-      if (mobileDropdownRef.current) {
-        const rect = mobileDropdownRef.current.getBoundingClientRect();
-        setIsSticky(rect.top <= 0);
+      if (mobileDropdownRef.current && menuSectionRef.current) {
+        const dropdownRect = mobileDropdownRef.current.getBoundingClientRect();
+        const sectionRect = menuSectionRef.current.getBoundingClientRect();
+        
+        // Check if we're in the menu section
+        const inSection = sectionRect.top <= window.innerHeight && sectionRect.bottom >= 0;
+        setIsInMenuSection(inSection);
+        
+        // Only show sticky if dropdown is past top AND we're still in menu section
+        const shouldBeSticky = dropdownRect.top <= 0 && inSection;
+        setIsSticky(shouldBeSticky);
       }
     };
 
@@ -392,7 +403,7 @@ const Menu = () => {
   const currentCategory = categories.find(cat => cat.id === activeCategory);
 
   return (
-    <section id="menu" className="section-padding bg-gradient-to-br from-gray-50 to-white">
+    <section ref={menuSectionRef} id="menu" className="section-padding bg-gradient-to-br from-gray-50 to-white">
       <div className="container-custom">
         <motion.div
           ref={ref}
@@ -491,12 +502,12 @@ const Menu = () => {
           </motion.div>
         </div>
 
-        {/* Sticky Mobile Category Bar */}
+        {/* Sticky Mobile Category Bar - Only show when in menu section */}
         <motion.div
           initial={{ y: -100, opacity: 0 }}
           animate={{ 
-            y: isSticky ? 0 : -100, 
-            opacity: isSticky ? 1 : 0 
+            y: isSticky && isInMenuSection ? 0 : -100, 
+            opacity: isSticky && isInMenuSection ? 1 : 0 
           }}
           transition={{ duration: 0.3 }}
           className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-lg border-b border-gray-200"
