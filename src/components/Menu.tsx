@@ -20,15 +20,16 @@ const Menu = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [activeCategory, setActiveCategory] = useState('fusion');
-  const [isSticky, setIsSticky] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const menuHeaderRef = useRef<HTMLDivElement>(null);
+  const [showStickyMobileMenu, setShowStickyMobileMenu] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Handle sticky behavior
+  // Handle sticky behavior for mobile dropdown
   useEffect(() => {
     const handleScroll = () => {
-      if (menuHeaderRef.current) {
-        const rect = menuHeaderRef.current.getBoundingClientRect();
+      if (mobileDropdownRef.current) {
+        const rect = mobileDropdownRef.current.getBoundingClientRect();
         setIsSticky(rect.top <= 0);
       }
     };
@@ -412,7 +413,6 @@ const Menu = () => {
 
         {/* Desktop Category Tabs */}
         <motion.div
-          ref={menuHeaderRef}
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -444,7 +444,7 @@ const Menu = () => {
         </motion.div>
 
         {/* Mobile Category Selector */}
-        <div className="md:hidden mb-8">
+        <div ref={mobileDropdownRef} className="md:hidden mb-8">
           <button
             onClick={() => setShowMobileMenu(!showMobileMenu)}
             className={`w-full bg-gradient-to-r ${currentCategory?.gradient} text-white px-6 py-4 rounded-2xl font-bold text-lg shadow-lg flex items-center justify-between`}
@@ -503,7 +503,7 @@ const Menu = () => {
         >
           <div className="px-4 py-3">
             <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              onClick={() => setShowStickyMobileMenu(!showStickyMobileMenu)}
               className={`w-full bg-gradient-to-r ${currentCategory?.gradient} text-white px-4 py-3 rounded-xl font-bold text-sm shadow-lg flex items-center justify-between`}
             >
               <div className="flex items-center space-x-2">
@@ -511,7 +511,7 @@ const Menu = () => {
                 <span>{currentCategory?.name}</span>
               </div>
               <motion.div
-                animate={{ rotate: showMobileMenu ? 180 : 0 }}
+                animate={{ rotate: showStickyMobileMenu ? 180 : 0 }}
                 transition={{ duration: 0.3 }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -524,8 +524,8 @@ const Menu = () => {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ 
-                opacity: showMobileMenu ? 1 : 0, 
-                height: showMobileMenu ? 'auto' : 0 
+                opacity: showStickyMobileMenu ? 1 : 0, 
+                height: showStickyMobileMenu ? 'auto' : 0 
               }}
               transition={{ duration: 0.3 }}
               className="overflow-hidden bg-white rounded-xl shadow-lg mt-2 border border-gray-100"
@@ -535,7 +535,7 @@ const Menu = () => {
                   key={category.id}
                   onClick={() => {
                     setActiveCategory(category.id);
-                    setShowMobileMenu(false);
+                    setShowStickyMobileMenu(false);
                   }}
                   className={`w-full px-4 py-3 text-left flex items-center space-x-2 hover:bg-gray-50 transition-colors duration-200 text-sm ${
                     activeCategory === category.id ? 'bg-gray-50 border-l-4 border-primary' : ''
