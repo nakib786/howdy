@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 // Halal Logo Component
 const HalalLogo = ({ className = "w-4 h-4" }: { className?: string }) => (
@@ -20,6 +20,22 @@ const Menu = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [activeCategory, setActiveCategory] = useState('fusion');
+  const [isSticky, setIsSticky] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const menuHeaderRef = useRef<HTMLDivElement>(null);
+
+  // Handle sticky behavior
+  useEffect(() => {
+    const handleScroll = () => {
+      if (menuHeaderRef.current) {
+        const rect = menuHeaderRef.current.getBoundingClientRect();
+        setIsSticky(rect.top <= 0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const categories = [
     { id: 'appetizers', name: 'Appetizers', icon: '🥟', gradient: 'from-orange-400 to-red-500' },
@@ -372,6 +388,8 @@ const Menu = () => {
     return <span>{diet}</span>;
   };
 
+  const currentCategory = categories.find(cat => cat.id === activeCategory);
+
   return (
     <section id="menu" className="section-padding bg-gradient-to-br from-gray-50 to-white">
       <div className="container-custom">
@@ -392,12 +410,13 @@ const Menu = () => {
           </p>
         </motion.div>
 
-        {/* Category Tabs */}
+        {/* Desktop Category Tabs */}
         <motion.div
+          ref={menuHeaderRef}
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex flex-wrap justify-center gap-3 mb-16"
+          className="hidden md:flex flex-wrap justify-center gap-3 mb-16"
         >
           {categories.map((category) => (
             <button
@@ -422,6 +441,112 @@ const Menu = () => {
               )}
             </button>
           ))}
+        </motion.div>
+
+        {/* Mobile Category Selector */}
+        <div className="md:hidden mb-8">
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className={`w-full bg-gradient-to-r ${currentCategory?.gradient} text-white px-6 py-4 rounded-2xl font-bold text-lg shadow-lg flex items-center justify-between`}
+          >
+            <div className="flex items-center space-x-3">
+              <span className="text-xl">{currentCategory?.icon}</span>
+              <span>{currentCategory?.name}</span>
+            </div>
+            <motion.div
+              animate={{ rotate: showMobileMenu ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </motion.div>
+          </button>
+
+          {/* Mobile Dropdown Menu */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ 
+              opacity: showMobileMenu ? 1 : 0, 
+              height: showMobileMenu ? 'auto' : 0 
+            }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden bg-white rounded-2xl shadow-lg mt-2 border border-gray-100"
+          >
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => {
+                  setActiveCategory(category.id);
+                  setShowMobileMenu(false);
+                }}
+                className={`w-full px-6 py-4 text-left flex items-center space-x-3 hover:bg-gray-50 transition-colors duration-200 ${
+                  activeCategory === category.id ? 'bg-gray-50 border-l-4 border-primary' : ''
+                }`}
+              >
+                <span className="text-lg">{category.icon}</span>
+                <span className="font-medium text-gray-900">{category.name}</span>
+              </button>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Sticky Mobile Category Bar */}
+        <motion.div
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ 
+            y: isSticky ? 0 : -100, 
+            opacity: isSticky ? 1 : 0 
+          }}
+          transition={{ duration: 0.3 }}
+          className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-lg border-b border-gray-200"
+        >
+          <div className="px-4 py-3">
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className={`w-full bg-gradient-to-r ${currentCategory?.gradient} text-white px-4 py-3 rounded-xl font-bold text-sm shadow-lg flex items-center justify-between`}
+            >
+              <div className="flex items-center space-x-2">
+                <span className="text-lg">{currentCategory?.icon}</span>
+                <span>{currentCategory?.name}</span>
+              </div>
+              <motion.div
+                animate={{ rotate: showMobileMenu ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </motion.div>
+            </button>
+
+            {/* Sticky Mobile Dropdown */}
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ 
+                opacity: showMobileMenu ? 1 : 0, 
+                height: showMobileMenu ? 'auto' : 0 
+              }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden bg-white rounded-xl shadow-lg mt-2 border border-gray-100"
+            >
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => {
+                    setActiveCategory(category.id);
+                    setShowMobileMenu(false);
+                  }}
+                  className={`w-full px-4 py-3 text-left flex items-center space-x-2 hover:bg-gray-50 transition-colors duration-200 text-sm ${
+                    activeCategory === category.id ? 'bg-gray-50 border-l-4 border-primary' : ''
+                  }`}
+                >
+                  <span className="text-base">{category.icon}</span>
+                  <span className="font-medium text-gray-900">{category.name}</span>
+                </button>
+              ))}
+            </motion.div>
+          </div>
         </motion.div>
 
         {/* Menu Items */}
