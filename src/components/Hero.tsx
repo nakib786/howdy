@@ -139,72 +139,106 @@ const Hero = () => {
         />
       </motion.div>
 
-      {/* Interactive Food Collage */}
-      {foodItems.map((item) => (
-        <motion.div
-          key={item.id}
-          className="absolute z-15 cursor-pointer group"
-          style={{
-            left: `${item.x}%`,
-            top: `${item.y}%`,
-          }}
-          initial={{ opacity: 0, scale: 0, rotate: -10 }}
-          animate={{ 
-            opacity: 1, 
-            scale: 1,
-            rotate: 0,
-          }}
-          transition={{
-            duration: 0.8,
-            delay: item.delay,
-            type: "spring",
-            stiffness: 100
-          }}
-          whileHover={{ 
-            scale: 1.15,
-            rotate: 5,
-            zIndex: 50,
-            transition: { duration: 0.3 }
-          }}
-        >
-          {/* Food Card */}
+      {/* Interactive Food Collage - Hidden on mobile for better performance */}
+      <div className="hidden md:block">
+        {foodItems.map((item) => (
           <motion.div
-            className={`${item.size} relative rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 backdrop-blur-sm`}
-            whileHover={{
-              boxShadow: "0 25px 50px rgba(251, 191, 36, 0.3)",
-              borderColor: "rgba(251, 191, 36, 0.6)"
+            key={item.id}
+            className="absolute z-15 cursor-pointer group"
+            style={{
+              left: `${item.x}%`,
+              top: `${item.y}%`,
+            }}
+            initial={{ opacity: 0, scale: 0, rotate: -10 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1,
+              rotate: 0,
+            }}
+            transition={{
+              duration: 0.8,
+              delay: item.delay,
+              type: "spring",
+              stiffness: 100
+            }}
+            whileHover={{ 
+              scale: 1.15,
+              rotate: 5,
+              zIndex: 50,
+              transition: { duration: 0.3 }
             }}
           >
-            <img
-              src={item.image}
-              alt={item.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-            
-            {/* Overlay */}
+            {/* Food Card */}
             <motion.div
-              className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            />
-            
-            {/* Title */}
-            <motion.div
-              className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              initial={{ y: 10 }}
-              whileHover={{ y: 0 }}
-            >
-              {item.title}
-            </motion.div>
-
-            {/* Floating particles on hover */}
-            <motion.div
-              className="absolute inset-0 pointer-events-none"
+              className={`${item.size} relative rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 backdrop-blur-sm`}
               whileHover={{
-                background: "radial-gradient(circle at center, rgba(251, 191, 36, 0.1) 0%, transparent 70%)"
+                boxShadow: "0 25px 50px rgba(251, 191, 36, 0.3)",
+                borderColor: "rgba(251, 191, 36, 0.6)"
+              }}
+            >
+              <img
+                src={item.image}
+                alt={item.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              
+              {/* Overlay */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              />
+              
+              {/* Title */}
+              <motion.div
+                className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                initial={{ y: 10 }}
+                whileHover={{ y: 0 }}
+              >
+                {item.title}
+              </motion.div>
+
+              {/* Floating particles on hover */}
+              <motion.div
+                className="absolute inset-0 pointer-events-none"
+                whileHover={{
+                  background: "radial-gradient(circle at center, rgba(251, 191, 36, 0.1) 0%, transparent 70%)"
+                }}
+              />
+            </motion.div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Mobile-friendly animated background elements */}
+      <div className="block md:hidden">
+        <motion.div
+          className="absolute inset-0 z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2 }}
+        >
+          {/* Subtle animated circles for mobile */}
+          {[...Array(6)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-amber-400/10 rounded-full"
+              style={{
+                left: `${15 + Math.random() * 70}%`,
+                top: `${20 + Math.random() * 60}%`,
+              }}
+              animate={{
+                opacity: [0, 0.4, 0],
+                scale: [0, 2, 0],
+                y: [0, -20, 0],
+              }}
+              transition={{
+                duration: 4 + Math.random() * 2,
+                repeat: Infinity,
+                delay: Math.random() * 2,
               }}
             />
-          </motion.div>
+          ))}
         </motion.div>
-      ))}
+      </div>
 
       {/* Simple Circle Mouse Follower */}
       <motion.div
@@ -262,7 +296,7 @@ const Hero = () => {
 
           {/* Main Title */}
           <motion.h1 
-            className="text-6xl md:text-8xl lg:text-9xl font-heading font-bold mb-6 relative"
+            className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-heading font-bold mb-4 md:mb-6 relative"
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.5, delay: 0.5 }}
@@ -292,7 +326,7 @@ const Hero = () => {
 
           {/* Tagline */}
           <motion.p 
-            className="text-xl md:text-2xl lg:text-3xl font-light mb-6 text-gray-300 max-w-4xl mx-auto leading-relaxed"
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-light mb-4 md:mb-6 text-gray-300 max-w-4xl mx-auto leading-relaxed px-4"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 0.8 }}
@@ -302,7 +336,7 @@ const Hero = () => {
 
           {/* Description */}
           <motion.p 
-            className="text-base md:text-lg opacity-80 max-w-3xl mx-auto leading-relaxed text-gray-400"
+            className="text-sm sm:text-base md:text-lg opacity-80 max-w-3xl mx-auto leading-relaxed text-gray-400 px-4"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 1.1 }}
@@ -314,15 +348,15 @@ const Hero = () => {
 
         {/* Action Buttons */}
         <motion.div
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 1.4 }}
         >
           {/* Primary CTA */}
-          <Link to="menu" smooth={true} duration={800} className="cursor-pointer">
+          <Link to="menu" smooth={true} duration={800} className="cursor-pointer w-full sm:w-auto">
             <motion.button
-              className="relative px-8 py-4 text-lg font-medium text-black bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-2xl overflow-hidden group min-w-[200px]"
+              className="relative px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium text-black bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-2xl overflow-hidden group w-full sm:min-w-[200px]"
               whileHover={{ 
                 scale: 1.05,
                 boxShadow: "0 20px 40px rgba(251, 191, 36, 0.4)"
@@ -349,9 +383,9 @@ const Hero = () => {
           </Link>
 
           {/* Secondary CTA */}
-          <Link to="contact" smooth={true} duration={800} className="cursor-pointer">
+          <Link to="contact" smooth={true} duration={800} className="cursor-pointer w-full sm:w-auto">
             <motion.button
-              className="px-8 py-4 text-lg font-medium text-white border-2 border-white/30 rounded-full backdrop-blur-sm hover:border-amber-400/60 hover:bg-amber-400/10 transition-all duration-300 min-w-[200px]"
+              className="px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium text-white border-2 border-white/30 rounded-full backdrop-blur-sm hover:border-amber-400/60 hover:bg-amber-400/10 transition-all duration-300 w-full sm:min-w-[200px]"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
