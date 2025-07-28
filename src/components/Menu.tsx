@@ -1,7 +1,73 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { supabase, type MenuItem, type Category } from '../lib/supabase';
+
+// Mobile Menu Item Component
+const MobileMenuItem = ({ 
+  item, 
+  getDietaryIcon, 
+  renderDietaryIcon 
+}: { 
+  item: MenuItem; 
+  getDietaryIcon: (icon: string) => string; 
+  renderDietaryIcon: (diet: string) => React.ReactElement; 
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full text-left flex items-center justify-between py-2 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+      >
+        <span className="text-sm text-gray-600">
+          {isExpanded ? 'Hide details' : 'View details'}
+        </span>
+        <motion.div
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </motion.div>
+      </button>
+      
+      <motion.div
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ 
+          height: isExpanded ? 'auto' : 0, 
+          opacity: isExpanded ? 1 : 0 
+        }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden"
+      >
+        <div className="pt-2 pb-4">
+          <p className="text-gray-600 leading-relaxed mb-3 text-sm">
+            {item.description}
+          </p>
+          
+          {/* Mobile Dietary Information */}
+          {item.dietary_tags && item.dietary_tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {item.dietary_tags.map((diet: string, idx: number) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
+                  title={getDietaryIcon(diet)}
+                >
+                  {renderDietaryIcon(diet)}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 // Halal Logo Component
 const HalalLogo = ({ className = "w-4 h-4" }: { className?: string }) => (
@@ -414,7 +480,7 @@ const Menu = () => {
             variants={containerVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
-            className="grid md:grid-cols-2 xl:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-8"
           >
             {filteredMenuItems.map((item) => (
               <motion.div
@@ -426,7 +492,7 @@ const Menu = () => {
                   <img
                     src={item.image_url}
                     alt={item.name}
-                    className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-40 md:h-56 object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
@@ -443,19 +509,25 @@ const Menu = () => {
                   </div>
                 </div>
                 
-                <div className="p-6">
-                  <h3 className="text-xl font-heading font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors duration-300">
+                <div className="p-4 md:p-6">
+                  <h3 className="text-lg md:text-xl font-heading font-bold text-gray-900 mb-2 md:mb-3 group-hover:text-primary transition-colors duration-300">
                     {item.name}
                   </h3>
                   
-                  <p className="text-gray-600 leading-relaxed mb-4 text-sm">
+                  {/* Desktop: Always show description */}
+                  <p className="hidden md:block text-gray-600 leading-relaxed mb-4 text-sm">
                     {item.description}
                   </p>
                   
-                  {/* Dietary Information */}
-                  {item.dietary_tags && item.dietary_tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {item.dietary_tags.map((diet: string, idx: number) => (
+                  {/* Mobile: Show description only when expanded */}
+                  <div className="md:hidden">
+                    <MobileMenuItem item={item} getDietaryIcon={getDietaryIcon} renderDietaryIcon={renderDietaryIcon} />
+                  </div>
+                  
+                  {/* Desktop: Always show dietary information */}
+                  <div className="hidden md:flex flex-wrap gap-2">
+                    {item.dietary_tags && item.dietary_tags.length > 0 && 
+                      item.dietary_tags.map((diet: string, idx: number) => (
                         <span
                           key={idx}
                           className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors duration-200"
@@ -463,9 +535,9 @@ const Menu = () => {
                         >
                           {renderDietaryIcon(diet)}
                         </span>
-                      ))}
-                    </div>
-                  )}
+                      ))
+                    }
+                  </div>
                 </div>
               </motion.div>
             ))}
