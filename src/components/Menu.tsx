@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
-import { supabase, type MenuItem, type Category } from '../lib/supabase';
+import { supabase, type MenuItem, type Category, type Promo } from '../lib/supabase';
 
 // Mobile Menu Item Component
 const MobileMenuItem = ({ 
@@ -98,8 +98,46 @@ const Menu = () => {
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [activePromos, setActivePromos] = useState<Promo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Calculate discounted price for a menu item
+  const calculateDiscountedPrice = (originalPrice: number, promo: Promo): number => {
+    if (promo.discount_type === 'percentage') {
+      return Math.max(0, originalPrice - (originalPrice * promo.discount_value / 100));
+    } else {
+      return Math.max(0, originalPrice - promo.discount_value);
+    }
+  };
+
+  // Get the best active promo for a menu item
+  const getBestPromoForItem = (item: MenuItem): Promo | null => {
+    const now = new Date().toISOString();
+    
+    return activePromos.find(promo => {
+      // Check if promo is active and within date range
+      if (!promo.is_active || now < promo.start_date || now > promo.end_date) {
+        return false;
+      }
+      
+      // Check usage limits
+      if (promo.max_uses && promo.current_uses >= promo.max_uses) {
+        return false;
+      }
+      
+      // Check if promo applies to this item
+      if (promo.applies_to === 'all_items') {
+        return true;
+      } else if (promo.applies_to === 'specific_categories' && promo.category_ids) {
+        return promo.category_ids.includes(item.category_id || '');
+      } else if (promo.applies_to === 'specific_items' && promo.item_ids) {
+        return promo.item_ids.includes(item.id);
+      }
+      
+      return false;
+    }) || null;
+  };
 
   // Fetch data from Supabase
   useEffect(() => {
@@ -161,6 +199,24 @@ const Menu = () => {
 
         console.log('✅ Menu items loaded:', menuData);
         setMenuItems(menuData || []);
+
+        // Fetch active promos
+        const now = new Date().toISOString();
+        const { data: promosData, error: promosError } = await supabase
+          .from('promos')
+          .select('*')
+          .eq('is_active', true)
+          .lte('start_date', now)
+          .gte('end_date', now)
+          .order('created_at', { ascending: false });
+
+        if (promosError) {
+          console.error('❌ Error fetching promos:', promosError);
+          // Don't set error for promos, just log it
+        } else {
+          console.log('✅ Active promos loaded:', promosData);
+          setActivePromos(promosData || []);
+        }
       } catch (error) {
         console.error('❌ Error fetching data:', error);
         setError(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -514,9 +570,37 @@ const Menu = () => {
                     </div>
                   )}
                   
+                  {/* Promo Badge */}
+                  {getBestPromoForItem(item) && !item.is_popular && (
+                    <div className="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                      🎉 SALE
+                    </div>
+                  )}
+                  
+                  {/* Promo Badge (when item is also popular) */}
+                  {getBestPromoForItem(item) && item.is_popular && (
+                    <div className="absolute top-12 left-4 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                      🎉 SALE
+                    </div>
+                  )}
+                  
                   {/* Price Badge */}
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-900 px-4 py-2 rounded-full font-bold text-lg shadow-lg">
-                    ${item.price}
+                    {(() => {
+                      const bestPromo = getBestPromoForItem(item);
+                      if (bestPromo) {
+                        const discountedPrice = calculateDiscountedPrice(item.price, bestPromo);
+                        const savings = item.price - discountedPrice;
+                        return (
+                          <div className="text-center">
+                            <div className="text-red-600 font-bold">${discountedPrice.toFixed(2)}</div>
+                            <div className="text-xs text-gray-500 line-through">${item.price.toFixed(2)}</div>
+                            <div className="text-xs text-green-600 font-bold">SAVE ${savings.toFixed(2)}</div>
+                          </div>
+                        );
+                      }
+                      return `$${item.price.toFixed(2)}`;
+                    })()}
                   </div>
                 </div>
                 

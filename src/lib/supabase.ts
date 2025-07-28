@@ -27,7 +27,7 @@ export interface MenuItem {
   description: string
   price: number
   image_url: string
-  category_id: string
+  category_id?: string // Temporary for current database structure
   dietary_tags: string[]
   is_popular: boolean
   created_at: string
@@ -43,9 +43,45 @@ export interface Category {
   created_at: string
 }
 
+export interface MenuItemCategory {
+  id: string
+  menu_item_id: string
+  category_id: string
+  created_at: string
+}
+
 export interface AdminUser {
   id: string
   email: string
   role: 'admin' | 'manager'
+  created_at: string
+}
+
+// Promo types
+export interface Promo {
+  id: string
+  name: string
+  description: string
+  discount_type: 'percentage' | 'fixed_amount'
+  discount_value: number
+  start_date: string
+  end_date: string
+  is_active: boolean
+  applies_to: 'all_items' | 'specific_categories' | 'specific_items'
+  category_ids?: string[]
+  item_ids?: string[]
+  promo_code?: string
+  max_uses?: number
+  current_uses: number
+  created_at: string
+  updated_at: string
+}
+
+export interface PromoItem {
+  id: string
+  promo_id: string
+  menu_item_id: string
+  original_price: number
+  discounted_price: number
   created_at: string
 } 
