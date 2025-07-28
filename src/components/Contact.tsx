@@ -11,22 +11,22 @@ const Contact = () => {
     {
       icon: MapPin,
       title: 'Address',
-      details: ['275 B Clearview Crescent #112', 'Williams Lake, BC V2G 4H6'],
+      details: ['700 Midnight Dr #104', 'Williams Lake, BC V2G 4N3'],
     },
     {
       icon: Phone,
       title: 'Phone',
-      details: ['(250) 392-FOOD', '(250) 392-3663'],
+      details: ['(236) 591-9147'],
     },
     {
       icon: Mail,
       title: 'Email',
-      details: ['hello@howdycafe.ca', 'orders@howdycafe.ca'],
+      details: ['hello@howdycafe.ca'],
     },
     {
       icon: Clock,
       title: 'Hours',
-      details: ['Mon-Thu: 11am-9pm', 'Fri-Sat: 11am-10pm', 'Sun: 12pm-8pm'],
+      details: ['Mon-Sun: 7am-9pm'],
     },
   ];
 
@@ -72,11 +72,52 @@ const Contact = () => {
                   <h3 className="font-heading font-bold text-xl text-gray-900 mb-2">
                     {info.title}
                   </h3>
-                  {info.details.map((detail, detailIndex) => (
-                    <p key={detailIndex} className="text-gray-600 leading-relaxed">
-                      {detail}
-                    </p>
-                  ))}
+                  {info.details.map((detail, detailIndex) => {
+                    // Make phone number clickable
+                    if (info.title === 'Phone') {
+                      return (
+                        <a
+                          key={detailIndex}
+                          href={`tel:${detail.replace(/[^\d+]/g, '')}`}
+                          className="text-gray-600 leading-relaxed hover:text-primary transition-colors duration-300 cursor-pointer"
+                        >
+                          {detail}
+                        </a>
+                      );
+                    }
+                    // Make address clickable (opens Google Maps)
+                    if (info.title === 'Address') {
+                      return (
+                        <a
+                          key={detailIndex}
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detail)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 leading-relaxed hover:text-primary transition-colors duration-300 cursor-pointer"
+                        >
+                          {detail}
+                        </a>
+                      );
+                    }
+                    // Make email clickable
+                    if (info.title === 'Email') {
+                      return (
+                        <a
+                          key={detailIndex}
+                          href={`mailto:${detail}`}
+                          className="text-gray-600 leading-relaxed hover:text-primary transition-colors duration-300 cursor-pointer"
+                        >
+                          {detail}
+                        </a>
+                      );
+                    }
+                    // Regular text for other details
+                    return (
+                      <p key={detailIndex} className="text-gray-600 leading-relaxed">
+                        {detail}
+                      </p>
+                    );
+                  })}
                 </div>
               </motion.div>
             ))}
@@ -93,7 +134,7 @@ const Contact = () => {
               </h3>
               <div className="flex space-x-4">
                 <a
-                  href="https://instagram.com/howdycafe"
+                  href="https://www.instagram.com/howdy_cafewl/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white hover:scale-110 transition-transform duration-300"
@@ -101,7 +142,7 @@ const Contact = () => {
                   <Instagram className="w-6 h-6" />
                 </a>
                 <a
-                  href="https://facebook.com/howdycafe"
+                  href="https://www.facebook.com/howdycafewl"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white hover:scale-110 transition-transform duration-300"
@@ -121,7 +162,7 @@ const Contact = () => {
           >
             <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-lg h-96">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2396.5!2d-122.130203!3d52.128429!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s275%20B%20Clearview%20Crescent%20%23112%2C%20Williams%20Lake%2C%20BC%20V2G%204H6!5e0!3m2!1sen!2sca!4v1234567890"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2396.5!2d-122.130203!3d52.128429!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s700%20Midnight%20Dr%20%23104%2C%20Williams%20Lake%2C%20BC%20V2G%204N3!5e0!3m2!1sen!2sca!4v1234567890"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -164,10 +205,10 @@ const Contact = () => {
               Call ahead for reservations or just drop by - we can't wait to serve you!
             </p>
             <a
-              href="tel:+12503923663"
+              href="tel:+12365919147"
               className="bg-white text-primary font-semibold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors duration-300 inline-block"
             >
-              Call Now: (250) 392-FOOD
+              Call Now: (236) 591-9147
             </a>
           </div>
         </motion.div>

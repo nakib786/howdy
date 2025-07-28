@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+import aboutImage from '../assets/premium_photo-1673108852141-e8c3c22a4a22.avif';
 
 const About = () => {
   const ref = useRef(null);
@@ -40,8 +41,8 @@ const About = () => {
             
             <div className="grid grid-cols-2 gap-6 pt-6">
               <div className="text-center">
-                <h3 className="text-3xl font-heading font-bold text-primary">5+</h3>
-                <p className="text-gray-600">Years Serving</p>
+                <h3 className="text-3xl font-heading font-bold text-primary">25+</h3>
+                <p className="text-gray-600">Spice Blends</p>
               </div>
               <div className="text-center">
                 <h3 className="text-3xl font-heading font-bold text-primary">50+</h3>
@@ -59,8 +60,8 @@ const About = () => {
           >
             <div className="relative overflow-hidden rounded-2xl shadow-2xl">
               <img
-                src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-                alt="Howdy Cafe interior"
+                src={aboutImage}
+                alt="Beautiful fusion cuisine presentation"
                 className="w-full h-96 object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>

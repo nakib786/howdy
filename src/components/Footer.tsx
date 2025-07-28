@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { Heart, MapPin, Phone, Mail, Clock, Instagram, Facebook, Twitter, Star } from 'lucide-react';
+import { Heart, MapPin, Phone, Mail, Clock, Instagram, Facebook, Star } from 'lucide-react';
 import { useState } from 'react';
+import logoWhite from '../assets/Howdy Cafe Logo - Horizontal Whiet Text.png';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
@@ -73,9 +74,8 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Twitter, href: "#", label: "Twitter" }
+    { icon: Instagram, href: "https://www.instagram.com/howdy_cafewl/", label: "Instagram" },
+    { icon: Facebook, href: "https://www.facebook.com/howdycafewl", label: "Facebook" }
   ];
 
   const quickLinks = [
@@ -83,8 +83,7 @@ const Footer = () => {
     { name: "Our Menu", href: "#menu" },
     { name: "Contact", href: "#contact" },
     { name: "Reservations", href: "#contact" },
-    { name: "Catering", href: "#contact" },
-    { name: "Privacy Policy", href: "#" }
+    { name: "Catering", href: "#contact" }
   ];
 
   return (
@@ -109,13 +108,17 @@ const Footer = () => {
               viewport={{ once: true }}
               className="lg:col-span-2"
             >
-              <motion.h3 
-                className="text-4xl font-heading font-bold mb-4 bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent"
+              <motion.div 
+                className="mb-4"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                Howdy Cafe
-              </motion.h3>
+                <img 
+                  src={logoWhite} 
+                  alt="Howdy Cafe Logo" 
+                  className="h-16 md:h-20 object-contain"
+                />
+              </motion.div>
               
               <p className="text-amber-100 text-lg mb-6 font-light">
                 Where Pakistani Spices Meet Canadian Comfort
@@ -134,7 +137,7 @@ const Footer = () => {
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <MapPin className="w-5 h-5 text-amber-400" />
-                  <span>275 B Clearview Crescent #112, Williams Lake, BC V2G 4H6</span>
+                  <span>700 Midnight Dr #104, Williams Lake, BC V2G 4N3</span>
                 </motion.div>
                 
                 <motion.div 
@@ -143,7 +146,7 @@ const Footer = () => {
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <Phone className="w-5 h-5 text-amber-400" />
-                  <span>(250) 392-FOOD</span>
+                  <span>(236) 591-9147</span>
                 </motion.div>
                 
                 <motion.div 
@@ -200,26 +203,8 @@ const Footer = () => {
                   whileHover={{ backgroundColor: "rgba(251, 191, 36, 0.1)" }}
                   transition={{ duration: 0.3 }}
                 >
-                  <span className="text-gray-300">Mon - Thu</span>
-                  <span className="text-amber-400 font-medium">11am - 9pm</span>
-                </motion.div>
-                
-                <motion.div 
-                  className="flex justify-between items-center p-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10"
-                  whileHover={{ backgroundColor: "rgba(251, 191, 36, 0.1)" }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <span className="text-gray-300">Fri - Sat</span>
-                  <span className="text-amber-400 font-medium">11am - 10pm</span>
-                </motion.div>
-                
-                <motion.div 
-                  className="flex justify-between items-center p-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10"
-                  whileHover={{ backgroundColor: "rgba(251, 191, 36, 0.1)" }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <span className="text-gray-300">Sunday</span>
-                  <span className="text-amber-400 font-medium">12pm - 8pm</span>
+                  <span className="text-gray-300">Mon - Sun</span>
+                  <span className="text-amber-400 font-medium">7am - 9pm</span>
                 </motion.div>
               </div>
 
@@ -279,9 +264,9 @@ const Footer = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
-                className="flex items-center gap-4 text-gray-400 text-sm"
+                className="flex flex-col md:flex-row items-center gap-4 text-gray-400 text-sm text-center md:text-left"
               >
-                <span>© 2024 Howdy Cafe. All rights reserved.</span>
+                <span>© {new Date().getFullYear()} Howdy Cafe. All rights reserved.</span>
                 <div className="flex items-center gap-1">
                   <span>Made with</span>
                   <motion.div
@@ -291,6 +276,17 @@ const Footer = () => {
                     <Heart className="w-4 h-4 text-red-500" fill="currentColor" />
                   </motion.div>
                   <span>in Williams Lake, BC</span>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center gap-1">
+                  <span>Powered by</span>
+                  <a
+                    href="https://aurorabusiness.ca"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold bg-gradient-to-r from-red-500 via-green-500 to-blue-500 bg-clip-text text-transparent animate-pulse hover:animate-none transition-all duration-300 text-center"
+                  >
+                    Aurora N&N Business Solution Inc.
+                  </a>
                 </div>
               </motion.div>
             </div>
