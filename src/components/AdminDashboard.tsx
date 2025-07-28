@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase, type MenuItem, type Category, type Promo } from '../lib/supabase'
 import { LogOut, Plus, Edit, Trash2, Menu as MenuIcon, Settings, GripVertical, Smile } from 'lucide-react'
 import howdyLogo from '../assets/Howdy Cafe Logo - Horizontal Black Text.png'
+import howdyLogoStacked from '../assets/Howdy Cafe Logo - Stacked Black Text.png'
 import {
   DndContext,
   closestCenter,
@@ -134,9 +135,9 @@ const SortableCategoryItem: React.FC<SortableCategoryItemProps> = ({ category, o
           </button>
         </div>
       </div>
-      <div className="p-6">
-        <h3 className="font-bold text-lg text-gray-900 mb-2">{category.name}</h3>
-        <p className="text-sm text-gray-600">Drag to reorder categories</p>
+      <div className="p-4 sm:p-6">
+        <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-2">{category.name}</h3>
+        <p className="text-xs sm:text-sm text-gray-600">Drag to reorder categories</p>
       </div>
     </motion.div>
   )
@@ -532,23 +533,29 @@ const AdminDashboard: React.FC = () => {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* Mobile: Stacked logo, Desktop: Horizontal logo */}
               <img 
-                src={howdyLogo} 
+                src={howdyLogoStacked}
                 alt="Howdy Cafe Logo" 
-                className="h-12 w-auto"
+                className="h-8 sm:h-12 w-auto sm:hidden"
               />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-sm text-gray-600">Welcome back, {user?.email}</p>
+              <img 
+                src={howdyLogo}
+                alt="Howdy Cafe Logo" 
+                className="h-8 sm:h-12 w-auto hidden sm:block"
+              />
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Admin Dashboard</h1>
+                <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.email}</p>
               </div>
             </div>
             <button
               onClick={handleSignOut}
-              className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              <span>Sign Out</span>
+              <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
         </div>
@@ -556,7 +563,7 @@ const AdminDashboard: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Navigation Tabs */}
-        <div className="flex space-x-1 bg-white rounded-xl p-1 shadow-sm mb-8">
+        <div className="flex flex-wrap sm:flex-nowrap space-x-1 bg-white rounded-xl p-1 shadow-sm mb-8 overflow-x-auto">
           {[
             { id: 'menu', label: 'Menu Items', icon: MenuIcon },
             { id: 'categories', label: 'Categories', icon: Settings },
@@ -565,14 +572,14 @@ const AdminDashboard: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab.id
                   ? 'bg-primary text-white shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               <tab.icon className="w-4 h-4" />
-              <span>{tab.label}</span>
+              <span className="text-sm sm:text-base">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -580,19 +587,19 @@ const AdminDashboard: React.FC = () => {
         {/* Content */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
           {activeTab === 'menu' && (
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">Menu Items</h2>
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-2 sm:space-y-0">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Menu Items</h2>
                 <button
                   onClick={() => setShowAddItem(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Item</span>
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {menuItems.map((item) => (
                   <motion.div
                     key={item.id}
@@ -626,12 +633,12 @@ const AdminDashboard: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                       <div className="flex items-start justify-between mb-3">
-                        <h3 className="font-bold text-lg text-gray-900 line-clamp-1">{item.name}</h3>
-                        <span className="text-lg font-bold text-primary">${item.price}</span>
+                        <h3 className="font-bold text-base sm:text-lg text-gray-900 line-clamp-1">{item.name}</h3>
+                        <span className="text-base sm:text-lg font-bold text-primary">${item.price}</span>
                       </div>
-                      <p className="text-gray-600 text-sm line-clamp-2 mb-4">{item.description}</p>
+                      <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 mb-4">{item.description}</p>
                       {item.dietary_tags && item.dietary_tags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {item.dietary_tags.slice(0, 3).map((tag, index) => (
@@ -657,18 +664,18 @@ const AdminDashboard: React.FC = () => {
           )}
 
           {activeTab === 'categories' && (
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-4">
-                  <h2 className="text-xl font-semibold text-gray-900">Categories</h2>
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-2 sm:space-y-0">
+                <div className="flex items-center space-x-2 sm:space-x-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Categories</h2>
                   {isUpdatingOrder && (
-                    <div className="flex items-center space-x-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm">
-                      <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="flex items-center space-x-2 px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs sm:text-sm">
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                       <span>Updating order...</span>
                     </div>
                   )}
                   {dragSuccess && (
-                    <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm">
+                    <div className="flex items-center space-x-2 px-2 sm:px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs sm:text-sm">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span>Order updated successfully!</span>
                     </div>
@@ -676,7 +683,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setShowAddCategory(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Category</span>
@@ -692,7 +699,7 @@ const AdminDashboard: React.FC = () => {
                   items={categories.map(category => category.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {categories.map((category) => (
                       <SortableCategoryItem
                         key={category.id}
@@ -708,19 +715,19 @@ const AdminDashboard: React.FC = () => {
           )}
 
           {activeTab === 'promos' && (
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">Promotions</h2>
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-2 sm:space-y-0">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Promotions</h2>
                 <button
                   onClick={() => setShowAddPromo(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Promotion</span>
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {promos.map((promo) => (
                   <motion.div
                     key={promo.id}
@@ -754,24 +761,24 @@ const AdminDashboard: React.FC = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="p-6">
-                      <h3 className="font-bold text-lg text-gray-900 mb-2">{promo.name}</h3>
-                      <p className="text-gray-600 text-sm mb-4">{promo.description}</p>
+                    <div className="p-4 sm:p-6">
+                      <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-2">{promo.name}</h3>
+                      <p className="text-gray-600 text-xs sm:text-sm mb-4">{promo.description}</p>
                       
                       <div className="space-y-2 mb-4">
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-xs sm:text-sm">
                           <span className="text-gray-600">Discount:</span>
                           <span className="font-semibold">
                             {promo.discount_type === 'percentage' ? `${promo.discount_value}%` : `$${promo.discount_value}`}
                           </span>
                         </div>
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-xs sm:text-sm">
                           <span className="text-gray-600">Valid until:</span>
                           <span className="font-semibold">
                             {new Date(promo.end_date).toLocaleDateString()}
                           </span>
                         </div>
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-xs sm:text-sm">
                           <span className="text-gray-600">Usage:</span>
                           <span className="font-semibold">
                             {promo.current_uses} / {promo.max_uses || '∞'}
@@ -780,9 +787,9 @@ const AdminDashboard: React.FC = () => {
                       </div>
 
                       {promo.promo_code && (
-                        <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                          <div className="text-sm text-gray-600 mb-1">Promo Code:</div>
-                          <div className="font-mono font-bold text-lg">{promo.promo_code}</div>
+                        <div className="bg-gray-50 rounded-lg p-2 sm:p-3 mb-4">
+                          <div className="text-xs sm:text-sm text-gray-600 mb-1">Promo Code:</div>
+                          <div className="font-mono font-bold text-sm sm:text-lg">{promo.promo_code}</div>
                         </div>
                       )}
                     </div>
