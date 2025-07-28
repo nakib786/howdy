@@ -94,7 +94,10 @@ const Menu = () => {
   const [showStickyMobileMenu, setShowStickyMobileMenu] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const [isInMenuSection, setIsInMenuSection] = useState(false);
+  const [showEndOfMenuHint, setShowEndOfMenuHint] = useState(false);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
+  const menuItemsRef = useRef<HTMLDivElement>(null);
+  const hintShownRef = useRef(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,12 +175,13 @@ const Menu = () => {
     fetchData();
   }, []);
 
-  // Handle sticky behavior for mobile dropdown
+  // Handle sticky behavior for mobile dropdown and end-of-menu hint
   useEffect(() => {
     const handleScroll = () => {
-      if (mobileDropdownRef.current && menuSectionRef.current) {
+      if (mobileDropdownRef.current && menuSectionRef.current && menuItemsRef.current) {
         const dropdownRect = mobileDropdownRef.current.getBoundingClientRect();
         const sectionRect = menuSectionRef.current.getBoundingClientRect();
+        const menuItemsRect = menuItemsRef.current.getBoundingClientRect();
         
         // Check if we're in the menu section
         const inSection = sectionRect.top <= window.innerHeight && sectionRect.bottom >= 0;
@@ -186,6 +190,31 @@ const Menu = () => {
         // Only show sticky if dropdown is past top AND we're still in menu section
         const shouldBeSticky = dropdownRect.top <= 0 && inSection;
         setIsSticky(shouldBeSticky);
+        
+        // Check if user is near the end of menu items (mobile only)
+        if (window.innerWidth < 768) { // Mobile only
+          const scrollPosition = window.scrollY + window.innerHeight;
+          const menuItemsBottom = menuItemsRect.bottom;
+          const threshold = 100; // pixels from bottom
+          
+          // Reset hint if user scrolls away from the end
+          if (scrollPosition < menuItemsBottom - threshold - 50) {
+            hintShownRef.current = false;
+          }
+          
+          if (scrollPosition >= menuItemsBottom - threshold && !hintShownRef.current) {
+            // Show hint for a brief moment
+            hintShownRef.current = true;
+            setShowEndOfMenuHint(true);
+            setShowMobileMenu(true);
+            
+            // Auto-hide after 2 seconds
+            setTimeout(() => {
+              setShowMobileMenu(false);
+              setShowEndOfMenuHint(false);
+            }, 2000);
+          }
+        }
       }
     };
 
@@ -389,10 +418,13 @@ const Menu = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ 
                 opacity: showMobileMenu ? 1 : 0, 
-                height: showMobileMenu ? 'auto' : 0 
+                height: showMobileMenu ? 'auto' : 0,
+                scale: showEndOfMenuHint ? 1.02 : 1
               }}
               transition={{ duration: 0.3 }}
-              className="overflow-hidden bg-white rounded-2xl shadow-lg mt-2 border border-gray-100"
+              className={`overflow-hidden bg-white rounded-2xl shadow-lg mt-2 border border-gray-100 ${
+                showEndOfMenuHint ? 'ring-2 ring-primary ring-opacity-50' : ''
+              }`}
             >
               {categories.map((category) => (
                 <button
@@ -476,6 +508,7 @@ const Menu = () => {
         {/* Menu Items */}
         {filteredMenuItems.length > 0 ? (
           <motion.div
+            ref={menuItemsRef}
             key={activeCategory}
             variants={containerVariants}
             initial="hidden"
