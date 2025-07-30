@@ -370,8 +370,7 @@ const Menu = () => {
           </h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-primary via-pink-500 to-primary mx-auto mb-8 rounded-full"></div>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-            Discover our carefully crafted fusion dishes that celebrate the best of both worlds, 
-            where Pakistani spices meet Canadian comfort
+          Deliciously made with Canadian goodness, cooked to perfection, and served with care. Our menu is where great taste meets high standards.
           </p>
         </motion.div>
 

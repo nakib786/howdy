@@ -9,6 +9,7 @@ import Footer from './components/Footer'
 import AdminLogin from './components/AdminLogin'
 import AdminDashboard from './components/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
+import NotFound from './components/NotFound'
 
 function App() {
   return (
@@ -88,6 +89,7 @@ function App() {
                 <AdminDashboard />
               </ProtectedRoute>
             } />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </Router>

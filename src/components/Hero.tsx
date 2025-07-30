@@ -201,7 +201,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 0.8 }}
           >
-            Where Pakistani Spices Meet Canadian Comfort
+            Fuel your fun with every bite!
           </motion.p>
 
           {/* Description */}
@@ -211,8 +211,8 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 1.1 }}
           >
-            Experience culinary artistry where traditional Pakistani flavors dance with Canadian ingredients, 
-            creating an unforgettable fusion dining experience in the heart of Williams Lake.
+            Discover the perfect blend of authentic Pakistani spices and fresh Canadian ingredients, 
+            served with genuine warmth in our family-owned kitchen where every dish tells a story of tradition and love.
           </motion.p>
         </motion.div>
 
@@ -276,7 +276,7 @@ const Hero = () => {
         >
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4" />
-            <span>{todaysHours}</span>
+            <span className="font-bold text-white">{todaysHours}</span>
           </div>
         </motion.div>
       </motion.div>

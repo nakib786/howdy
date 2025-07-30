@@ -45,7 +45,7 @@ const Contact = () => {
           </h2>
           <div className="w-20 h-1 bg-primary mx-auto mb-6"></div>
           <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-            Come experience the warmth of our hospitality and the richness of our fusion cuisine
+            Visit us to taste the difference of a local, family-owned spot where authentic flavours meet real heart.
           </p>
         </motion.div>
 

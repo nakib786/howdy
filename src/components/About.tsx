@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import aboutImage from '../assets/premium_photo-1673108852141-e8c3c22a4a22.avif';
+import aboutImage from '../assets/WhatsApp Image 2025-07-30 at 3.03.18 AM.jpeg';
 
 const About = () => {
   const ref = useRef(null);
@@ -24,29 +24,30 @@ const About = () => {
             </h2>
             <div className="w-20 h-1 bg-primary"></div>
             <p className="text-lg text-gray-700 leading-relaxed">
-              Born from a passion for bringing together the rich, aromatic spices of Pakistan 
-              with the hearty, comforting flavors of Canada, Howdy Cafe represents a unique 
-              culinary journey in Williams Lake, BC.
+              Welcome to Howdy Cafe, where we're all about fueling your fun with every bite! 
+              Born from a love of bringing people together through amazing food, we've created 
+              a unique spot in Williams Lake that celebrates the best of both worlds.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
-              Our kitchen is where East meets West, where traditional Pakistani recipes are 
-              lovingly crafted alongside Canadian favorites, creating a fusion that celebrates 
-              both cultures. Every dish tells a story of heritage, innovation, and the warm 
-              hospitality that defines our community.
+              Our kitchen is where Pakistani tradition meets Canadian comfort - think omelet 
+              your way that'll make you smile, butter chicken wrap that warms your soul, and 
+              Howdy's finest burger that feels like home. We're not just serving food; we're creating moments 
+              of joy, one delicious plate at a time.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
-              From our signature butter chicken poutine to our maple-glazed biryani, 
-              we invite you to experience flavors that bridge continents and bring people together.
+              From our family to yours, we invite you to experience flavors that bring 
+              communities together. Whether you're craving something spicy, something 
+              comforting, or just something that makes you feel good, we've got you covered!
             </p>
             
-            <div className="grid grid-cols-2 gap-6 pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-6 pt-8">
               <div className="text-center">
-                <h3 className="text-3xl font-heading font-bold text-primary">25+</h3>
-                <p className="text-gray-600">Spice Blends</p>
+                <h3 className="text-2xl md:text-3xl font-heading font-bold text-primary mb-2">Spice & Soul</h3>
+                <p className="text-gray-600 text-sm md:text-base">Every dish tells a story</p>
               </div>
               <div className="text-center">
-                <h3 className="text-3xl font-heading font-bold text-primary">50+</h3>
-                <p className="text-gray-600">Fusion Dishes</p>
+                <h3 className="text-2xl md:text-3xl font-heading font-bold text-primary mb-2">Fresh Daily</h3>
+                <p className="text-gray-600 text-sm md:text-base">Made with love & local ingredients</p>
               </div>
             </div>
           </motion.div>
@@ -72,12 +73,12 @@ const About = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl border border-gray-100"
+              className="absolute -bottom-6 -left-6 bg-white/10 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-white/20"
             >
-              <h4 className="font-heading font-bold text-xl text-gray-900 mb-2">
+              <h4 className="font-heading font-bold text-xl text-white mb-2 drop-shadow-lg">
                 Family Owned
               </h4>
-              <p className="text-gray-600">
+              <p className="text-white/90 drop-shadow-md">
                 Proudly serving Williams Lake with authentic flavors and warm hospitality
               </p>
             </motion.div>

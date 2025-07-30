@@ -1,12 +1,64 @@
 import { motion } from 'framer-motion';
 import { Heart, MapPin, Phone, Mail, Clock, Instagram, Facebook, Star } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import logoWhite from '../assets/Howdy Cafe Logo - Horizontal Whiet Text.png';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState('');
+  const [currentFactIndex, setCurrentFactIndex] = useState(0);
+
+  const funFacts = [
+    {
+      icon: "🍞",
+      text: "Pakistan has over 40 different types of bread! From naan to roti, each region has its own unique style."
+    },
+    {
+      icon: "🥘",
+      text: "Biryani originated in the royal kitchens of the Mughal Empire and has over 26 different regional variations in Pakistan!"
+    },
+    {
+      icon: "🌶️",
+      text: "Pakistani cuisine uses over 50 different spices, with garam masala being the most essential blend in every kitchen."
+    },
+    {
+      icon: "🍖",
+      text: "Karahi, the iconic Pakistani dish, gets its name from the wok-like cooking vessel used to prepare it."
+    },
+    {
+      icon: "🥛",
+      text: "Lassi, Pakistan's traditional yogurt drink, has been consumed for over 4,000 years and comes in sweet, salty, and fruity varieties."
+    },
+    {
+      icon: "🌿",
+      text: "Pakistani basmati rice from Punjab is considered the world's finest, with its long grains and aromatic fragrance."
+    },
+    {
+      icon: "🍵",
+      text: "Pakistan is the world's 3rd largest tea importer, with chai being a cultural cornerstone served 3-4 times daily."
+    },
+    {
+      icon: "🥖",
+      text: "The longest naan bread ever made was 1.5 kilometers long and created in Pakistan in 2019!"
+    },
+    {
+      icon: "🍯",
+      text: "Pakistani honey from the mountains of Khyber Pakhtunkhwa is famous for its medicinal properties and unique floral taste."
+    },
+    {
+      icon: "🌾",
+      text: "Pakistan is the world's 8th largest wheat producer, making it the breadbasket of South Asia."
+    }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFactIndex((prevIndex) => (prevIndex + 1) % funFacts.length);
+    }, 10000); // Change every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [funFacts.length]);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,12 +173,12 @@ const Footer = () => {
               </motion.div>
               
               <p className="text-amber-100 text-lg mb-6 font-light">
-                Where Pakistani Spices Meet Canadian Comfort
+                Fuel your fun with every bite!
               </p>
               
               <p className="text-gray-400 text-base leading-relaxed mb-8 max-w-md">
-                Experience culinary artistry where traditional Pakistani flavors dance with Canadian ingredients, 
-                creating an unforgettable fusion dining experience in Williams Lake, BC.
+                Discover the perfect blend of authentic Pakistani spices and fresh Canadian ingredients, 
+                served with genuine warmth in our family-owned kitchen where every dish tells a story of tradition and love.
               </p>
 
               {/* Contact Info */}
@@ -208,7 +260,7 @@ const Footer = () => {
                 </motion.div>
               </div>
 
-              {/* Rating */}
+              {/* Fun Fact */}
               <motion.div 
                 className="mt-6 p-4 rounded-lg bg-gradient-to-r from-amber-400/10 to-orange-500/10 border border-amber-400/20"
                 initial={{ scale: 0.9 }}
@@ -217,12 +269,19 @@ const Footer = () => {
                 viewport={{ once: true }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-amber-400 fill-current" />
-                  ))}
-                  <span className="text-amber-400 font-semibold ml-2">4.9</span>
+                  <span className="text-amber-400 font-semibold text-lg">💡</span>
+                  <span className="text-amber-400 font-semibold">Did You Know?</span>
                 </div>
-                <p className="text-gray-400 text-sm">Based on 150+ reviews</p>
+                <motion.p 
+                  key={currentFactIndex}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-gray-400 text-sm"
+                >
+                  {funFacts[currentFactIndex].text} {funFacts[currentFactIndex].icon}
+                </motion.p>
               </motion.div>
             </motion.div>
           </div>
