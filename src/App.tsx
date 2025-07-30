@@ -3,19 +3,20 @@ import { AuthProvider } from './contexts/AuthContext'
 import Hero from './components/Hero'
 import About from './components/About'
 import Menu from './components/Menu'
-
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import AdminLogin from './components/AdminLogin'
 import AdminDashboard from './components/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './components/NotFound'
+import ScrollProgress from './components/ScrollProgress'
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="App">
+          <ScrollProgress />
           {/* React 19 Native Metadata Support */}
           <title>Howdy Cafe | Pakistani-Canadian Fusion in Williams Lake</title>
           <meta 
