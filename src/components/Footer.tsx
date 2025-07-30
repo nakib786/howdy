@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Heart, MapPin, Phone, Mail, Clock, Instagram, Facebook, Star } from 'lucide-react';
+import { Heart, MapPin, Phone, Mail, Clock, Instagram, Facebook } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import logoWhite from '../assets/Howdy Cafe Logo - Horizontal Whiet Text.png';
 
