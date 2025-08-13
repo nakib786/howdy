@@ -312,7 +312,7 @@ const Menu = () => {
   // Show error message if there's an error
   if (error) {
     return (
-      <section ref={menuSectionRef} id="menu" className="section-padding bg-gradient-to-br from-gray-50 to-white">
+      <section ref={menuSectionRef} className="section-padding bg-gradient-to-br from-gray-50 to-white">
         <div className="container-custom">
           <motion.div
             ref={ref}
@@ -356,7 +356,7 @@ const Menu = () => {
 
   // Remove loading fallback and always render the menu
   return (
-    <section ref={menuSectionRef} id="menu" className="section-padding bg-gradient-to-br from-gray-50 to-white">
+    <section ref={menuSectionRef} id="menu" className="section-padding scroll-mt-24 md:scroll-mt-28 bg-gradient-to-br from-gray-50 to-white">
       <div className="container-custom">
         <motion.div
           ref={ref}

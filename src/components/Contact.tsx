@@ -32,7 +32,7 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contact" className="section-padding bg-white">
+    <section id="contact" className="section-padding scroll-mt-24 md:scroll-mt-28 bg-white">
       <div className="container-custom">
         <motion.div
           ref={ref}
@@ -161,7 +161,7 @@ const Contact = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="relative"
           >
-            <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-lg h-96 relative">
+            <div id="map" className="bg-gray-100 rounded-2xl overflow-hidden shadow-lg h-96 relative scroll-mt-24 md:scroll-mt-28">
               <iframe
                 src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=700+Midnight+Dr+%23104,+Williams+Lake,+BC+V2G+4N3&zoom=15&maptype=roadmap"
                 width="100%"

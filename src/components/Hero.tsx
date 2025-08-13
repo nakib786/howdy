@@ -1,6 +1,5 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { MapPin, Clock } from 'lucide-react';
-import { Link } from 'react-scroll';
 import { useState, useEffect } from 'react';
 import logoWhite from '../assets/Howdy Cafe Logo - Stacked White Text.png';
 
@@ -222,7 +221,18 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 1.4 }}
         >
           {/* Primary CTA */}
-          <Link to="menu" smooth={true} duration={800} className="cursor-pointer w-full sm:w-auto">
+          <a 
+            href="#menu" 
+            className="cursor-pointer w-full sm:w-auto"
+            onClick={(e) => {
+              e.preventDefault();
+              const headerOffset = 96; // ~24px * 4; adjust if header height changes
+              const element = document.getElementById('menu');
+              if (!element) return console.error('Menu element not found');
+              const elementTop = element.getBoundingClientRect().top + window.pageYOffset;
+              window.scrollTo({ top: elementTop - headerOffset, behavior: 'smooth' });
+            }}
+          >
             <motion.button
               className="relative px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium text-black bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-2xl overflow-hidden group w-full sm:min-w-[200px]"
               whileHover={{ 
@@ -248,10 +258,19 @@ const Hero = () => {
                 </motion.span>
               </span>
             </motion.button>
-          </Link>
+          </a>
 
           {/* Secondary CTA */}
-          <Link to="contact" smooth={true} duration={800} className="cursor-pointer w-full sm:w-auto">
+          <a 
+            href="#map" 
+            className="cursor-pointer w-full sm:w-auto"
+            onClick={(e) => {
+              e.preventDefault();
+              const element = document.getElementById('map');
+              if (!element) return console.error('Map element not found');
+              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+          >
             <motion.button
               className="px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium text-white border-2 border-white/30 rounded-full backdrop-blur-sm hover:border-amber-400/60 hover:bg-amber-400/10 transition-all duration-300 w-full sm:min-w-[200px]"
               whileHover={{ scale: 1.02 }}
@@ -262,7 +281,7 @@ const Hero = () => {
                 Visit Us
               </span>
             </motion.button>
-          </Link>
+          </a>
         </motion.div>
 
         {/* Stats */}
