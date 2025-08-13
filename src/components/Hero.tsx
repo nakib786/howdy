@@ -211,8 +211,6 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 1.1 }}
           >
-            Discover the perfect blend of authentic Pakistani spices and fresh Canadian ingredients, 
-            served with genuine warmth in our family-owned kitchen where every dish tells a story of tradition and love.
           </motion.p>
         </motion.div>
 
