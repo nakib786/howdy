@@ -10,8 +10,35 @@ import AdminDashboard from './components/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './components/NotFound'
 import ScrollProgress from './components/ScrollProgress'
+import PromoPosterLightbox from './components/PromoPosterLightbox'
+import { useState, useEffect } from 'react'
 
 function App() {
+  const [showPosterLightbox, setShowPosterLightbox] = useState(false)
+
+  useEffect(() => {
+    // Check if user has chosen "Don't show again" (persistent across sessions)
+    const dontShowAgain = localStorage.getItem('dontShowPoster')
+    
+    // For development/testing, you can force show the lightbox
+    const forceShow = import.meta.env.DEV && sessionStorage.getItem('forceShowPoster') === 'true'
+    
+    // Alternative: Show every time (uncomment the line below if you want this behavior)
+    // const showEveryTime = true
+    
+    // Don't show if user clicked "Don't show again" (unless forced)
+    if (dontShowAgain && !forceShow) {
+      return
+    }
+    
+    // Show the lightbox after a short delay
+    const timer = setTimeout(() => {
+      setShowPosterLightbox(true)
+    }, 1000) // 1 second delay
+    
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <AuthProvider>
       <Router>
@@ -92,6 +119,18 @@ function App() {
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>
+
+          {/* Promo Poster Lightbox */}
+          <PromoPosterLightbox 
+            isVisible={showPosterLightbox} 
+            onClose={() => {
+              setShowPosterLightbox(false)
+            }} 
+            onDontShowAgain={() => {
+              localStorage.setItem('dontShowPoster', 'true')
+              setShowPosterLightbox(false)
+            }}
+          />
         </div>
       </Router>
     </AuthProvider>

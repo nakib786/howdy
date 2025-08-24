@@ -11,44 +11,44 @@ const Footer = () => {
 
   const funFacts = [
     {
-      icon: "🍞",
-      text: "Pakistan has over 40 different types of bread! From naan to roti, each region has its own unique style."
+      icon: "🧼",
+      text: "Halal certification requires the highest standards of food hygiene and kitchen cleanliness."
     },
     {
-      icon: "🥘",
-      text: "Biryani originated in the royal kitchens of the Mughal Empire and has over 26 different regional variations in Pakistan!"
-    },
-    {
-      icon: "🌶️",
-      text: "Pakistani cuisine uses over 50 different spices, with garam masala being the most essential blend in every kitchen."
-    },
-    {
-      icon: "🍖",
-      text: "Karahi, the iconic Pakistani dish, gets its name from the wok-like cooking vessel used to prepare it."
-    },
-    {
-      icon: "🥛",
-      text: "Lassi, Pakistan's traditional yogurt drink, has been consumed for over 4,000 years and comes in sweet, salty, and fruity varieties."
+      icon: "🥩",
+      text: "Halal meat comes from healthy animals raised in clean, humane conditions with strict quality control."
     },
     {
       icon: "🌿",
-      text: "Pakistani basmati rice from Punjab is considered the world's finest, with its long grains and aromatic fragrance."
+      text: "All fresh fruits, vegetables, and grains are naturally pure and don't contain artificial preservatives."
     },
     {
-      icon: "🍵",
-      text: "Pakistan is the world's 3rd largest tea importer, with chai being a cultural cornerstone served 3-4 times daily."
-    },
-    {
-      icon: "🥖",
-      text: "The longest naan bread ever made was 1.5 kilometers long and created in Pakistan in 2019!"
+      icon: "🥛",
+      text: "Halal dairy products are made from pure, natural ingredients without artificial additives or fillers."
     },
     {
       icon: "🍯",
-      text: "Pakistani honey from the mountains of Khyber Pakhtunkhwa is famous for its medicinal properties and unique floral taste."
+      text: "Pure honey is a natural sweetener that's been used for centuries for its health benefits and delicious taste."
     },
     {
       icon: "🌾",
-      text: "Pakistan is the world's 8th largest wheat producer, making it the breadbasket of South Asia."
+      text: "Halal certification ensures food is prepared in spotless kitchens following strict hygiene protocols."
+    },
+    {
+      icon: "🥘",
+      text: "Quality halal cooking emphasizes fresh, wholesome ingredients and proper food safety practices."
+    },
+    {
+      icon: "🍵",
+      text: "Premium tea and coffee are naturally pure beverages, perfect for any health-conscious diner."
+    },
+    {
+      icon: "🥖",
+      text: "Quality bread and pastries are made with pure ingredients, no artificial preservatives or additives."
+    },
+    {
+      icon: "🌍",
+      text: "High-quality food standards are appreciated by people worldwide who value cleanliness and nutrition."
     }
   ];
 
@@ -177,8 +177,8 @@ const Footer = () => {
               </p>
               
               <p className="text-gray-400 text-base leading-relaxed mb-8 max-w-md">
-                Discover the perfect blend of authentic Pakistani spices and fresh Canadian ingredients, 
-                served with genuine warmth in our family-owned kitchen where every dish tells a story of tradition and love.
+                Discover the perfect blend of international flavors and fresh Canadian ingredients, 
+                served with genuine warmth in our family-owned kitchen where every dish tells a story of quality and care.
               </p>
 
               {/* Contact Info */}

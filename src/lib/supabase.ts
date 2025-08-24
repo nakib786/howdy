@@ -84,4 +84,17 @@ export interface PromoItem {
   original_price: number
   discounted_price: number
   created_at: string
+}
+
+// Promo Poster types
+export interface PromoPoster {
+  id: string
+  title: string
+  description?: string
+  image_url: string
+  start_date: string | null
+  end_date: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
 } 

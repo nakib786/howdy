@@ -26,10 +26,10 @@ const About = () => {
             <p className="text-lg text-gray-700 leading-relaxed">
               Welcome to Howdy Cafe, where we're all about fueling your fun with every bite! 
               Born from a love of bringing people together through amazing food, we've created 
-              a unique spot in Williams Lake that celebrates the best of both worlds.
+              a unique spot in Williams Lake that celebrates the best of Canadian hospitality and global flavors.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
-              Our kitchen is where Pakistani tradition meets Canadian comfort - think omelet 
+              Our kitchen is where international flavors meet Canadian comfort - think omelet 
               your way that'll make you smile, butter chicken wrap that warms your soul, and 
               Howdy's finest burger that feels like home. We're not just serving food; we're creating moments 
               of joy, one delicious plate at a time.

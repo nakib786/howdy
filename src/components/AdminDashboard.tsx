@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { supabase, type MenuItem, type Category, type Promo } from '../lib/supabase'
+import { supabase, type MenuItem, type Category, type Promo, type PromoPoster } from '../lib/supabase'
 import { LogOut, Plus, Edit, Trash2, Menu as MenuIcon, Settings, GripVertical, Smile } from 'lucide-react'
 import howdyLogo from '../assets/Howdy Cafe Logo - Horizontal Black Text.png'
 import howdyLogoStacked from '../assets/Howdy Cafe Logo - Stacked Black Text.png'
@@ -143,6 +143,245 @@ const SortableCategoryItem: React.FC<SortableCategoryItemProps> = ({ category, o
   )
 }
 
+// Image compression utility function
+const compressImage = async (file: File, maxSizeMB: number = 3): Promise<File> => {
+  console.log('🗜️ Starting image compression...');
+  console.log('📊 Original file size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+  
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      // Calculate new dimensions while maintaining aspect ratio
+      const maxWidth = 1920; // Max width for web
+      const maxHeight = 1080; // Max height for web
+      let { width, height } = img;
+      
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      
+      if (height > maxHeight) {
+        width = (width * maxHeight) / height;
+        height = maxHeight;
+      }
+      
+      // Set canvas dimensions
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Draw and compress
+      ctx?.drawImage(img, 0, 0, width, height);
+      
+      // Convert to blob with compression
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error('Failed to compress image'));
+            return;
+          }
+          
+          console.log('📊 Compressed file size:', (blob.size / 1024 / 1024).toFixed(2), 'MB');
+          
+          // If still too large, compress further
+          if (blob.size > maxSizeMB * 1024 * 1024) {
+            console.log('🔄 File still too large, compressing further...');
+            compressImage(new File([blob], file.name, { type: file.type }), maxSizeMB)
+              .then(resolve)
+              .catch(reject);
+          } else {
+            const compressedFile = new File([blob], file.name, { type: file.type });
+            console.log('✅ Compression complete:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB');
+            resolve(compressedFile);
+          }
+        },
+        file.type,
+        0.8 // Start with 80% quality
+      );
+    };
+    
+    img.onerror = () => reject(new Error('Failed to load image for compression'));
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+// Test function to debug storage issues
+const testStorageConnection = async () => {
+  console.log('🧪 Testing Supabase storage connection...');
+  
+  try {
+    // Test 1: List buckets
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    console.log('📦 Available buckets:', buckets);
+    if (bucketsError) {
+      console.error('❌ Error listing buckets:', bucketsError);
+    }
+    
+    // Test 2: Check if menu-images bucket exists
+    const menuImagesBucket = buckets?.find(bucket => bucket.name === 'menu-images');
+    if (!menuImagesBucket) {
+      console.error('❌ menu-images bucket not found!');
+      console.log('Available buckets:', buckets?.map(b => b.name));
+      return false;
+    }
+    console.log('✅ menu-images bucket found:', menuImagesBucket);
+    
+    // Test 3: List files in menu-images bucket
+    const { data: files, error: filesError } = await supabase.storage
+      .from('menu-images')
+      .list();
+    console.log('📁 Files in menu-images bucket:', files);
+    if (filesError) {
+      console.error('❌ Error listing files:', filesError);
+    }
+    
+    // Test 4: Test public URL generation
+    if (files && files.length > 0) {
+      const testFile = files[0];
+      const { data: { publicUrl } } = supabase.storage
+        .from('menu-images')
+        .getPublicUrl(testFile.name);
+      console.log('🔗 Test public URL:', publicUrl);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('❌ Storage test failed:', error);
+    return false;
+  }
+};
+
+// Utility function for uploading images with automatic cleanup
+const uploadImageToStorage = async (file: File, folder: string = 'menu-items', oldImageUrl?: string): Promise<string> => {
+  console.log('📤 Starting upload process for file:', file.name, 'to folder:', folder);
+  console.log('📊 File details:', {
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    lastModified: file.lastModified
+  });
+  
+  // Validate file
+  if (!file) {
+    throw new Error('No file provided for upload');
+  }
+  
+  // Check file size (max 10MB - will be compressed if larger than 3MB)
+  const maxUploadSize = 10 * 1024 * 1024; // 10MB
+  const maxFinalSize = 3 * 1024 * 1024; // 3MB
+  
+  if (file.size > maxUploadSize) {
+    throw new Error(`File size too large. Maximum upload size is 10MB. Current size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+  }
+  
+  // Compress if larger than 3MB
+  let processedFile = file;
+  if (file.size > maxFinalSize) {
+    console.log('🗜️ File larger than 3MB, compressing...');
+    try {
+      processedFile = await compressImage(file, 3);
+      console.log('✅ Compression completed');
+    } catch (compressionError) {
+      console.warn('⚠️ Compression failed, using original file:', compressionError);
+      processedFile = file;
+    }
+  }
+  
+  // Check file type
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}. Current type: ${file.type}`);
+  }
+  
+  const fileExt = file.name.split('.').pop()?.toLowerCase();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+  const filePath = `${folder}/${fileName}`;
+  
+  console.log('📁 Generated file path:', filePath);
+
+  try {
+    // Upload new image first
+    console.log('⬆️ Uploading to Supabase storage...');
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('menu-images')
+      .upload(filePath, processedFile, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('❌ Upload error:', uploadError);
+      
+      // Provide more specific error messages
+      if (uploadError.message.includes('bucket')) {
+        throw new Error('Storage bucket not found. Please check your Supabase storage configuration.');
+      } else if (uploadError.message.includes('permission')) {
+        throw new Error('Permission denied. Please check your Supabase storage policies.');
+      } else if (uploadError.message.includes('size')) {
+        throw new Error('File size exceeds storage limits.');
+      } else {
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+    }
+
+    console.log('✅ Upload successful, getting public URL...');
+    console.log('📤 Upload response:', uploadData);
+
+    // Get the new public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('menu-images')
+      .getPublicUrl(filePath);
+      
+    console.log('🔗 Generated public URL:', publicUrl);
+
+    // Test if the URL is accessible
+    try {
+      const response = await fetch(publicUrl, { method: 'HEAD' });
+      if (!response.ok) {
+        console.warn('⚠️ Public URL might not be accessible yet:', response.status, response.statusText);
+      } else {
+        console.log('✅ Public URL is accessible');
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not verify public URL accessibility:', error);
+    }
+
+    // If there's an old image URL, delete it
+    if (oldImageUrl) {
+      try {
+        // Extract the file path from the old URL
+        const urlParts = oldImageUrl.split('/');
+        const oldFilePath = urlParts.slice(-2).join('/'); // Get the last two parts (folder/filename)
+        
+        console.log('🗑️ Attempting to delete old image:', oldFilePath);
+        
+        // Delete the old file
+        const { error: deleteError } = await supabase.storage
+          .from('menu-images')
+          .remove([oldFilePath]);
+        
+        if (deleteError) {
+          console.warn('⚠️ Failed to delete old image:', deleteError);
+          // Don't throw error here - the new image was uploaded successfully
+        } else {
+          console.log('✅ Successfully deleted old image:', oldFilePath);
+        }
+      } catch (error) {
+        console.warn('⚠️ Error during old image cleanup:', error);
+        // Don't throw error here - the new image was uploaded successfully
+      }
+    }
+
+    return publicUrl;
+  } catch (error) {
+    console.error('❌ Error in uploadImageToStorage:', error);
+    throw error;
+  }
+}
+
 const AdminDashboard: React.FC = () => {
   const { user, signOut, isAdmin } = useAuth()
   const navigate = useNavigate()
@@ -150,13 +389,16 @@ const AdminDashboard: React.FC = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [promos, setPromos] = useState<Promo[]>([])
+  const [posters, setPosters] = useState<PromoPoster[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddItem, setShowAddItem] = useState(false)
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [showAddPromo, setShowAddPromo] = useState(false)
+  const [showAddPoster, setShowAddPoster] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [editingPromo, setEditingPromo] = useState<Promo | null>(null)
+  const [editingPoster, setEditingPoster] = useState<PromoPoster | null>(null)
   const [dragSuccess, setDragSuccess] = useState(false)
   const [isUpdatingOrder, setIsUpdatingOrder] = useState(false)
 
@@ -208,6 +450,16 @@ const AdminDashboard: React.FC = () => {
       if (promosError) throw promosError
       console.log('Loaded promos:', promosData)
       setPromos(promosData || [])
+
+      // Load posters
+      const { data: postersData, error: postersError } = await supabase
+        .from('promo_posters')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (postersError) throw postersError
+      console.log('Loaded posters:', postersData)
+      setPosters(postersData || [])
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
@@ -284,7 +536,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleAddMenuItem = async (itemData: Omit<MenuItem, 'id' | 'created_at' | 'updated_at'> & { category_id: string }) => {
     try {
-      // First, create the menu item
+      // First, create the menu item with category_id
       const { data: newItem, error: itemError } = await supabase
         .from('menu_items')
         .insert([{
@@ -292,6 +544,7 @@ const AdminDashboard: React.FC = () => {
           description: itemData.description,
           price: itemData.price,
           image_url: itemData.image_url,
+          category_id: itemData.category_id, // Set category_id directly
           dietary_tags: itemData.dietary_tags,
           is_popular: itemData.is_popular,
         }])
@@ -299,16 +552,22 @@ const AdminDashboard: React.FC = () => {
       
       if (itemError) throw itemError
       
-      // Then, create the category relationship
+      // Then, try to create the category relationship (optional)
       if (newItem && newItem[0]) {
-        const { error: relationError } = await supabase
-          .from('menu_item_categories')
-          .insert([{
-            menu_item_id: newItem[0].id,
-            category_id: itemData.category_id,
-          }])
-        
-        if (relationError) throw relationError
+        try {
+          const { error: relationError } = await supabase
+            .from('menu_item_categories')
+            .insert([{
+              menu_item_id: newItem[0].id,
+              category_id: itemData.category_id,
+            }])
+          
+          if (relationError) {
+            console.log('menu_item_categories table not available, using direct category_id field')
+          }
+        } catch (error) {
+          console.log('menu_item_categories table not available, using direct category_id field')
+        }
       }
       
       setShowAddItem(false)
@@ -386,19 +645,24 @@ const AdminDashboard: React.FC = () => {
       
       // Update category relationship if category_id is provided
       if (itemData.category_id) {
-        // First, remove existing relationships
-        await supabase
-          .from('menu_item_categories')
-          .delete()
-          .eq('menu_item_id', itemData.id)
-        
-        // Then, add the new relationship
-        await supabase
-          .from('menu_item_categories')
-          .insert([{
-            menu_item_id: itemData.id,
-            category_id: itemData.category_id,
-          }])
+        try {
+          // First, remove existing relationships
+          await supabase
+            .from('menu_item_categories')
+            .delete()
+            .eq('menu_item_id', itemData.id)
+          
+          // Then, add the new relationship
+          await supabase
+            .from('menu_item_categories')
+            .insert([{
+              menu_item_id: itemData.id,
+              category_id: itemData.category_id,
+            }])
+        } catch (error) {
+          console.log('menu_item_categories table not available, using direct category_id update')
+          // If the table doesn't exist, we'll rely on the direct category_id field
+        }
       }
       
       setEditingItem(null)
@@ -516,6 +780,125 @@ const AdminDashboard: React.FC = () => {
     }
   }
 
+  const handleAddPoster = async (posterData: Omit<PromoPoster, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      console.log('Adding poster with data:', posterData)
+      
+      // Validate required fields (dates are optional for announcements)
+      if (!posterData.title || !posterData.image_url) {
+        console.error('Missing required fields:', posterData)
+        alert('Please fill in title and image URL')
+        return
+      }
+
+      // Prepare data - dates are optional
+      const formattedData = {
+        ...posterData,
+        start_date: posterData.start_date ? new Date(posterData.start_date).toISOString() : null,
+        end_date: posterData.end_date ? new Date(posterData.end_date).toISOString() : null,
+      }
+
+      console.log('Formatted poster data:', formattedData)
+
+      const { data, error } = await supabase
+        .from('promo_posters')
+        .insert([formattedData])
+        .select()
+      
+      if (error) {
+        console.error('Supabase error:', error)
+        alert(`Error adding poster: ${error.message}`)
+        throw error
+      }
+      
+      console.log('Poster added successfully:', data)
+      setShowAddPoster(false)
+      loadData()
+    } catch (error) {
+      console.error('Error adding poster:', error)
+      alert(`Error adding poster: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  const handleDeletePoster = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this poster?')) return
+    
+    try {
+      // First, get the poster data to find the image URL
+      const { data: poster, error: fetchError } = await supabase
+        .from('promo_posters')
+        .select('image_url')
+        .eq('id', id)
+        .single()
+      
+      if (fetchError) {
+        console.error('Error fetching poster data:', fetchError)
+        throw fetchError
+      }
+      
+      // Delete the poster from database
+      const { error: deleteError } = await supabase
+        .from('promo_posters')
+        .delete()
+        .eq('id', id)
+      
+      if (deleteError) throw deleteError
+      
+      // Delete the image from storage if it exists
+      if (poster?.image_url) {
+        try {
+          // Extract the file path from the image URL
+          const urlParts = poster.image_url.split('/')
+          const filePath = urlParts.slice(-2).join('/') // Get the last two parts (folder/filename)
+          
+          console.log('🗑️ Attempting to delete poster image:', filePath)
+          
+          // Delete the image file
+          const { error: imageDeleteError } = await supabase.storage
+            .from('menu-images')
+            .remove([filePath])
+          
+          if (imageDeleteError) {
+            console.warn('⚠️ Failed to delete poster image:', imageDeleteError)
+            // Don't throw error here - the poster was deleted successfully
+          } else {
+            console.log('✅ Successfully deleted poster image:', filePath)
+          }
+        } catch (imageError) {
+          console.warn('⚠️ Error during poster image cleanup:', imageError)
+          // Don't throw error here - the poster was deleted successfully
+        }
+      }
+      
+      loadData()
+    } catch (error) {
+      console.error('Error deleting poster:', error)
+    }
+  }
+
+  const handleEditPoster = async (posterData: PromoPoster) => {
+    try {
+      const { error } = await supabase
+        .from('promo_posters')
+        .update({
+          title: posterData.title,
+          description: posterData.description,
+          image_url: posterData.image_url,
+          start_date: posterData.start_date,
+          end_date: posterData.end_date,
+          is_active: posterData.is_active,
+        })
+        .eq('id', posterData.id)
+      
+      if (error) throw error
+      
+      setEditingPoster(null)
+      loadData()
+    } catch (error) {
+      console.error('Error updating poster:', error)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -568,6 +951,7 @@ const AdminDashboard: React.FC = () => {
             { id: 'menu', label: 'Menu Items', icon: MenuIcon },
             { id: 'categories', label: 'Categories', icon: Settings },
             { id: 'promos', label: 'Promotions', icon: Settings },
+            { id: 'posters', label: 'Posters', icon: Settings },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -590,13 +974,30 @@ const AdminDashboard: React.FC = () => {
             <div className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-2 sm:space-y-0">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Menu Items</h2>
-                <button
-                  onClick={() => setShowAddItem(true)}
-                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Item</span>
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={async () => {
+                      console.log('🧪 Running storage test...');
+                      const result = await testStorageConnection();
+                      if (result) {
+                        alert('✅ Storage test passed! Check console for details.');
+                      } else {
+                        alert('❌ Storage test failed! Check console for details.');
+                      }
+                    }}
+                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Test Storage</span>
+                  </button>
+                  <button
+                    onClick={() => setShowAddItem(true)}
+                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Item</span>
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -799,6 +1200,95 @@ const AdminDashboard: React.FC = () => {
             </div>
           )}
 
+          {activeTab === 'posters' && (
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-2 sm:space-y-0">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Promotional Posters</h2>
+                <button
+                  onClick={() => setShowAddPoster(true)}
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Poster</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {posters.map((poster) => (
+                  <motion.div
+                    key={poster.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+                  >
+                    <div className="relative">
+                      <img
+                        src={poster.image_url}
+                        alt={poster.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="absolute top-3 right-3 flex space-x-1">
+                        <button 
+                          onClick={() => setEditingPoster(poster)}
+                          className="p-2 bg-white/90 backdrop-blur-sm rounded-lg text-gray-600 hover:text-primary transition-colors hover:bg-white"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePoster(poster.id)}
+                          className="p-2 bg-white/90 backdrop-blur-sm rounded-lg text-gray-600 hover:text-red-600 transition-colors hover:bg-white"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="absolute top-3 left-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          poster.is_active ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'
+                        }`}>
+                          {poster.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4 sm:p-6">
+                      <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-2">{poster.title}</h3>
+                      {poster.description && (
+                        <p className="text-gray-600 text-xs sm:text-sm mb-4">{poster.description}</p>
+                      )}
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex justify-between text-xs sm:text-sm">
+                          <span className="text-gray-600">Start Date:</span>
+                          <span className="font-semibold">
+                            {poster.start_date ? new Date(poster.start_date).toLocaleDateString() : 'No start date'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs sm:text-sm">
+                          <span className="text-gray-600">End Date:</span>
+                          <span className="font-semibold">
+                            {poster.end_date ? new Date(poster.end_date).toLocaleDateString() : 'No end date'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Status indicator */}
+                      <div className="text-xs text-gray-500">
+                        {!poster.start_date && !poster.end_date ? (
+                          <span className="text-purple-600">Announcement</span>
+                        ) : poster.start_date && new Date() < new Date(poster.start_date) ? (
+                          <span className="text-blue-600">Scheduled</span>
+                        ) : poster.end_date && new Date() > new Date(poster.end_date) ? (
+                          <span className="text-red-600">Expired</span>
+                        ) : (
+                          <span className="text-green-600">Currently Active</span>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
 
         </div>
       </div>
@@ -859,6 +1349,23 @@ const AdminDashboard: React.FC = () => {
           onSubmit={handleEditPromo}
         />
       )}
+
+      {/* Add Poster Modal */}
+      {showAddPoster && (
+        <AddPosterModal
+          onClose={() => setShowAddPoster(false)}
+          onSubmit={handleAddPoster}
+        />
+      )}
+
+      {/* Edit Poster Modal */}
+      {editingPoster && (
+        <EditPosterModal
+          poster={editingPoster}
+          onClose={() => setEditingPoster(null)}
+          onSubmit={handleEditPoster}
+        />
+      )}
     </div>
   )
 }
@@ -902,23 +1409,7 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({ categories, onClose
   }
 
   const handleImageUpload = async (file: File): Promise<string> => {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random()}.${fileExt}`
-    const filePath = `menu-items/${fileName}`
-
-    const { error: uploadError } = await supabase.storage
-      .from('menu-images')
-      .upload(filePath, file)
-
-    if (uploadError) {
-      throw uploadError
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('menu-images')
-      .getPublicUrl(filePath)
-
-    return publicUrl
+    return uploadImageToStorage(file, 'menu-items')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -929,17 +1420,29 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({ categories, onClose
       let finalImageUrl = formData.image_url
       
       if (imageFile) {
-        finalImageUrl = await handleImageUpload(imageFile)
+        console.log('🖼️ Starting image upload for file:', imageFile.name, 'Size:', imageFile.size);
+        try {
+          finalImageUrl = await uploadImageToStorage(imageFile, 'menu-items')
+          console.log('✅ Image upload completed, URL:', finalImageUrl);
+        } catch (uploadError) {
+          console.error('❌ Image upload failed:', uploadError);
+          const errorMessage = uploadError instanceof Error ? uploadError.message : 'Unknown upload error';
+          alert(`Image upload failed: ${errorMessage}\n\nPlease check:\n- File size (max 5MB)\n- File format (JPEG, PNG, WebP, GIF)\n- Your internet connection\n- Supabase storage configuration`);
+          setUploading(false);
+          return;
+        }
       }
       
+      console.log('💾 Saving menu item with image URL:', finalImageUrl);
       await onSubmit({
         ...formData,
         price: parseFloat(formData.price),
         image_url: finalImageUrl,
       })
     } catch (error) {
-      console.error('Error uploading image:', error)
-      alert('Error uploading image. Please try again.')
+      console.error('Error saving menu item:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Error saving menu item: ${errorMessage}`)
     } finally {
       setUploading(false)
     }
@@ -1299,22 +1802,29 @@ const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({ item, categories,
   useEffect(() => {
     const loadItemCategories = async () => {
       try {
+        // Try to load from menu_item_categories table first
         const { data, error } = await supabase
           .from('menu_item_categories')
           .select('category_id')
           .eq('menu_item_id', item.id)
         
-        if (error) throw error
+        if (error) {
+          // If table doesn't exist, fallback to current database structure
+          if (item.category_id) {
+            setFormData(prev => ({ ...prev, selectedCategories: [item.category_id!] }))
+          }
+          return
+        }
         
-                 const categoryIds = data?.map(relation => relation.category_id).filter((id): id is string => Boolean(id)) || []
-         setFormData(prev => ({ ...prev, selectedCategories: categoryIds }))
-       } catch (error) {
-         console.error('Error loading item categories:', error)
-         // Fallback to current database structure
-         if (item.category_id) {
-           setFormData(prev => ({ ...prev, selectedCategories: [item.category_id!] }))
-         }
-       }
+        const categoryIds = data?.map(relation => relation.category_id).filter((id): id is string => Boolean(id)) || []
+        setFormData(prev => ({ ...prev, selectedCategories: categoryIds }))
+      } catch (error) {
+        console.error('Error loading item categories:', error)
+        // Fallback to current database structure
+        if (item.category_id) {
+          setFormData(prev => ({ ...prev, selectedCategories: [item.category_id!] }))
+        }
+      }
     }
 
     loadItemCategories()
@@ -1341,23 +1851,7 @@ const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({ item, categories,
   }
 
   const handleImageUpload = async (file: File): Promise<string> => {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random()}.${fileExt}`
-    const filePath = `menu-items/${fileName}`
-
-    const { error: uploadError } = await supabase.storage
-      .from('menu-images')
-      .upload(filePath, file)
-
-    if (uploadError) {
-      throw uploadError
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('menu-images')
-      .getPublicUrl(filePath)
-
-    return publicUrl
+    return uploadImageToStorage(file, 'menu-items')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1368,7 +1862,15 @@ const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({ item, categories,
       let finalImageUrl = formData.image_url
       
       if (imageFile) {
-        finalImageUrl = await handleImageUpload(imageFile)
+        try {
+          finalImageUrl = await uploadImageToStorage(imageFile, 'menu-items', item.image_url)
+        } catch (uploadError) {
+          console.error('❌ Image upload failed:', uploadError);
+          const errorMessage = uploadError instanceof Error ? uploadError.message : 'Unknown upload error';
+          alert(`Image upload failed: ${errorMessage}\n\nPlease check:\n- File size (max 5MB)\n- File format (JPEG, PNG, WebP, GIF)\n- Your internet connection\n- Supabase storage configuration`);
+          setUploading(false);
+          return;
+        }
       }
       
       // For now, use the first selected category (temporary fix for current database structure)
@@ -1382,8 +1884,9 @@ const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({ item, categories,
         category_id: primaryCategoryId, // Temporary for current structure
       })
     } catch (error) {
-      console.error('Error uploading image:', error)
-      alert('Error uploading image. Please try again.')
+      console.error('Error updating menu item:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Error updating menu item: ${errorMessage}`)
     } finally {
       setUploading(false)
     }
@@ -2555,6 +3058,422 @@ const EditPromoModal: React.FC<EditPromoModalProps> = ({ promo, categories, menu
                 className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
               >
                 Update Promotion
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+// Add Poster Modal Component
+interface AddPosterModalProps {
+  onClose: () => void
+  onSubmit: (data: Omit<PromoPoster, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
+}
+
+const AddPosterModal: React.FC<AddPosterModalProps> = ({ onClose, onSubmit }) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    image_url: '',
+    start_date: '',
+    end_date: '',
+    is_active: true,
+  })
+  const [isAnnouncement, setIsAnnouncement] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+
+  const handleImageUpload = async (file: File): Promise<string> => {
+    return uploadImageToStorage(file, 'posters')
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setUploading(true)
+    
+    try {
+      let finalImageUrl = formData.image_url
+      
+      if (imageFile) {
+        finalImageUrl = await handleImageUpload(imageFile)
+      }
+      
+      await onSubmit({
+        ...formData,
+        image_url: finalImageUrl,
+      })
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Error uploading image. Please try again.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-auto my-8 overflow-hidden border border-gray-100"
+      >
+        <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-6 text-white relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <h3 className="text-2xl font-bold">Add Promotional Poster</h3>
+          <p className="text-white/80 text-sm mt-1">Create a new promotional poster for your website</p>
+        </div>
+        <div className="p-8 max-h-[80vh] overflow-y-auto">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="poster-title" className="block text-sm font-medium text-gray-700 mb-1">
+                Poster Title *
+              </label>
+              <input
+                id="poster-title"
+                type="text"
+                placeholder="Enter poster title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="poster-description" className="block text-sm font-medium text-gray-700 mb-1">
+                Description (Optional)
+              </label>
+              <textarea
+                id="poster-description"
+                placeholder="Enter poster description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                rows={3}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="poster-image" className="block text-sm font-medium text-gray-700 mb-1">
+                Poster Image *
+              </label>
+              <div className="space-y-2">
+                <input
+                  id="poster-image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500">Upload an image or use URL below</p>
+                <input
+                  type="url"
+                  placeholder="Or enter image URL"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            {/* Announcement Toggle */}
+            <div className="flex items-center space-x-2 mb-4">
+              <input
+                type="checkbox"
+                id="is-announcement"
+                checked={isAnnouncement}
+                onChange={(e) => {
+                  setIsAnnouncement(e.target.checked)
+                  if (e.target.checked) {
+                    setFormData({ ...formData, start_date: '', end_date: '' })
+                  }
+                }}
+                className="rounded focus:ring-2 focus:ring-primary"
+              />
+              <label htmlFor="is-announcement" className="text-sm text-gray-700 font-medium">
+                This is an announcement (no date restrictions)
+              </label>
+            </div>
+
+            {!isAnnouncement && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date *
+                  </label>
+                  <input
+                    id="start-date"
+                    type="datetime-local"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required={!isAnnouncement}
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="end-date" className="block text-sm font-medium text-gray-700 mb-1">
+                    End Date *
+                  </label>
+                  <input
+                    id="end-date"
+                    type="datetime-local"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required={!isAnnouncement}
+                  />
+                </div>
+              </div>
+            )}
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="is-active"
+                checked={formData.is_active}
+                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                className="rounded focus:ring-2 focus:ring-primary"
+              />
+              <label htmlFor="is-active" className="text-sm text-gray-700">
+                Active poster
+              </label>
+            </div>
+            
+            <div className="flex space-x-2">
+              <button
+                type="submit"
+                disabled={uploading}
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploading ? 'Uploading...' : 'Add Poster'}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+// Edit Poster Modal Component
+interface EditPosterModalProps {
+  poster: PromoPoster
+  onClose: () => void
+  onSubmit: (data: PromoPoster) => Promise<void>
+}
+
+const EditPosterModal: React.FC<EditPosterModalProps> = ({ poster, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState({
+    title: poster.title,
+    description: poster.description || '',
+    image_url: poster.image_url,
+    start_date: poster.start_date ? poster.start_date.slice(0, 16) : '', // Format for datetime-local input
+    end_date: poster.end_date ? poster.end_date.slice(0, 16) : '',
+    is_active: poster.is_active,
+  })
+  const [isAnnouncement, setIsAnnouncement] = useState(!poster.start_date && !poster.end_date)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+
+  const handleImageUpload = async (file: File): Promise<string> => {
+    return uploadImageToStorage(file, 'posters', poster.image_url)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setUploading(true)
+    
+    try {
+      let finalImageUrl = formData.image_url
+      
+      if (imageFile) {
+        finalImageUrl = await handleImageUpload(imageFile)
+      }
+      
+      await onSubmit({
+        ...poster,
+        ...formData,
+        image_url: finalImageUrl,
+      })
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Error uploading image. Please try again.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-auto my-8 overflow-hidden border border-gray-100"
+      >
+        <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-6 text-white relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <h3 className="text-2xl font-bold">Edit Promotional Poster</h3>
+          <p className="text-white/80 text-sm mt-1">Update poster details</p>
+        </div>
+        <div className="p-8 max-h-[80vh] overflow-y-auto">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="edit-poster-title" className="block text-sm font-medium text-gray-700 mb-1">
+                Poster Title *
+              </label>
+              <input
+                id="edit-poster-title"
+                type="text"
+                placeholder="Enter poster title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="edit-poster-description" className="block text-sm font-medium text-gray-700 mb-1">
+                Description (Optional)
+              </label>
+              <textarea
+                id="edit-poster-description"
+                placeholder="Enter poster description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                rows={3}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="edit-poster-image" className="block text-sm font-medium text-gray-700 mb-1">
+                Poster Image *
+              </label>
+              <div className="space-y-2">
+                <input
+                  id="edit-poster-image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500">Upload a new image or use URL below</p>
+                <input
+                  type="url"
+                  placeholder="Or enter image URL"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            {/* Announcement Toggle */}
+            <div className="flex items-center space-x-2 mb-4">
+              <input
+                type="checkbox"
+                id="edit-is-announcement"
+                checked={isAnnouncement}
+                onChange={(e) => {
+                  setIsAnnouncement(e.target.checked)
+                  if (e.target.checked) {
+                    setFormData({ ...formData, start_date: '', end_date: '' })
+                  }
+                }}
+                className="rounded focus:ring-2 focus:ring-primary"
+              />
+              <label htmlFor="edit-is-announcement" className="text-sm text-gray-700 font-medium">
+                This is an announcement (no date restrictions)
+              </label>
+            </div>
+
+            {!isAnnouncement && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="edit-start-date" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date *
+                  </label>
+                  <input
+                    id="edit-start-date"
+                    type="datetime-local"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required={!isAnnouncement}
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="edit-end-date" className="block text-sm font-medium text-gray-700 mb-1">
+                    End Date *
+                  </label>
+                  <input
+                    id="edit-end-date"
+                    type="datetime-local"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required={!isAnnouncement}
+                  />
+                </div>
+              </div>
+            )}
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="edit-is-active"
+                checked={formData.is_active}
+                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                className="rounded focus:ring-2 focus:ring-primary"
+              />
+              <label htmlFor="edit-is-active" className="text-sm text-gray-700">
+                Active poster
+              </label>
+            </div>
+            
+            <div className="flex space-x-2">
+              <button
+                type="submit"
+                disabled={uploading}
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploading ? 'Uploading...' : 'Update Poster'}
               </button>
               <button
                 type="button"
