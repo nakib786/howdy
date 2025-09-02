@@ -373,6 +373,54 @@ const Menu = () => {
           <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
           Deliciously made with Canadian goodness, cooked to perfection, and served with care. Our menu is where great taste meets high standards.
           </p>
+          
+          {/* Photo Disclaimer */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mt-12 mb-8"
+          >
+            <div className="relative max-w-3xl mx-auto">
+              <div className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border border-slate-200/60 rounded-2xl p-6 shadow-sm backdrop-blur-sm">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-slate-800 mb-1 flex items-center">
+                      <span className="mr-2">📸</span>
+                      Photo Disclaimer
+                    </h4>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Menu photos are for <span className="font-medium text-slate-700">representational purposes only</span>. 
+                      Actual presentation may vary as we prepare each dish fresh to order, ensuring the highest quality and taste.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-slate-200/50">
+                  <div className="flex items-center justify-center space-x-6 text-xs text-slate-500">
+                    <span className="flex items-center">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                      Fresh ingredients
+                    </span>
+                    <span className="flex items-center">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                      Made to order
+                    </span>
+                    <span className="flex items-center">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                      Quality assured
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* Show loading indicator if still loading */}

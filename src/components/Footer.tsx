@@ -249,14 +249,30 @@ const Footer = () => {
                 Business Hours
               </h4>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <motion.div 
                   className="flex justify-between items-center p-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10"
                   whileHover={{ backgroundColor: "rgba(251, 191, 36, 0.1)" }}
                   transition={{ duration: 0.3 }}
                 >
-                  <span className="text-gray-300">Mon - Sun</span>
-                  <span className="text-amber-400 font-medium">7am - 9pm</span>
+                  <span className="text-gray-300">Mon - Fri</span>
+                  <span className="text-amber-400 font-medium">7 AM - 9 PM</span>
+                </motion.div>
+                <motion.div 
+                  className="flex justify-between items-center p-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10"
+                  whileHover={{ backgroundColor: "rgba(251, 191, 36, 0.1)" }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <span className="text-gray-300">Saturday</span>
+                  <span className="text-amber-400 font-medium">7 AM - 8 PM</span>
+                </motion.div>
+                <motion.div 
+                  className="flex justify-between items-center p-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10"
+                  whileHover={{ backgroundColor: "rgba(251, 191, 36, 0.1)" }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <span className="text-gray-300">Sunday</span>
+                  <span className="text-amber-400 font-medium">8 AM - 12 PM</span>
                 </motion.div>
               </div>
 

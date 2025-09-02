@@ -13,13 +13,13 @@ const Hero = () => {
 
   // Restaurant hours by day
   const weeklyHours = {
-    0: '7:00 AM - 9:00 PM', // Sunday
+    0: '8:00 AM - 12:00 PM', // Sunday
     1: '7:00 AM - 9:00 PM', // Monday
     2: '7:00 AM - 9:00 PM', // Tuesday
     3: '7:00 AM - 9:00 PM', // Wednesday
     4: '7:00 AM - 9:00 PM', // Thursday
     5: '7:00 AM - 9:00 PM', // Friday
-    6: '7:00 AM - 9:00 PM', // Saturday
+    6: '7:00 AM - 8:00 PM', // Saturday
   };
 
   useEffect(() => {
