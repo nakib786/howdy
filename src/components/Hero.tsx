@@ -7,7 +7,16 @@ import DeliveryServices from './DeliveryServices';
 const Hero = () => {
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 150]);
-  const opacity = useTransform(scrollY, [0, 200, 500], [1, 1, 0]);
+  
+  // Check if mobile device
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // More gradual fade for mobile - starts fading later and more slowly
+  const opacity = useTransform(
+    scrollY, 
+    isMobile ? [0, 400, 1000] : [0, 300, 800], 
+    [1, 1, 0]
+  );
   
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [todaysHours, setTodaysHours] = useState('');
@@ -28,12 +37,26 @@ const Hero = () => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
     
+    // Check if mobile device
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
     // Get today's hours
     const today = new Date().getDay();
     setTodaysHours(weeklyHours[today as keyof typeof weeklyHours]);
     
+    // Initial mobile check
+    checkMobile();
+    
+    // Listen for resize events
+    window.addEventListener('resize', checkMobile);
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
   }, []);
 
 
