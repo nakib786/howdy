@@ -1,7 +1,8 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import logoWhite from '../assets/Howdy Cafe Logo - Stacked White Text.png';
+import DeliveryServices from './DeliveryServices';
 
 const Hero = () => {
   const { scrollY } = useScroll();
@@ -282,14 +283,98 @@ const Hero = () => {
               </span>
             </motion.button>
           </a>
+
+          {/* Review CTA - Special Animated Button */}
+          <a 
+            href="https://g.page/r/CcJSDTodyALGEAE/review" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="cursor-pointer w-full sm:w-auto"
+          >
+            <motion.button
+              className="relative px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium text-white border-2 border-amber-400/50 rounded-full backdrop-blur-sm overflow-hidden group w-full sm:min-w-[200px]"
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 20px 40px rgba(251, 191, 36, 0.3)"
+              }}
+              whileTap={{ scale: 0.98 }}
+              animate={{
+                borderColor: [
+                  "rgba(251, 191, 36, 0.5)",
+                  "rgba(251, 191, 36, 0.8)",
+                  "rgba(251, 191, 36, 0.5)"
+                ],
+                boxShadow: [
+                  "0 0 20px rgba(251, 191, 36, 0.2)",
+                  "0 0 30px rgba(251, 191, 36, 0.4)",
+                  "0 0 20px rgba(251, 191, 36, 0.2)"
+                ]
+              }}
+              transition={{ 
+                borderColor: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+                boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+              }}
+            >
+              {/* Animated background gradient */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-amber-400/20 via-yellow-400/30 to-amber-400/20"
+                animate={{
+                  background: [
+                    "linear-gradient(90deg, rgba(251, 191, 36, 0.2), rgba(250, 204, 21, 0.3), rgba(251, 191, 36, 0.2))",
+                    "linear-gradient(90deg, rgba(251, 191, 36, 0.3), rgba(250, 204, 21, 0.4), rgba(251, 191, 36, 0.3))",
+                    "linear-gradient(90deg, rgba(251, 191, 36, 0.2), rgba(250, 204, 21, 0.3), rgba(251, 191, 36, 0.2))"
+                  ]
+                }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              />
+              
+              {/* Shimmer effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{ x: ["-100%", "100%"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              />
+              
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 360],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    rotate: { duration: 4, repeat: Infinity, ease: "linear" },
+                    scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                  }}
+                >
+                  <Star size={18} className="text-amber-400" />
+                </motion.div>
+                <span className="bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent font-semibold">
+                  Leave Review
+                </span>
+                <motion.span
+                  animate={{ 
+                    opacity: [0.5, 1, 0.5],
+                    scale: [1, 1.2, 1]
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-amber-400"
+                >
+                  ⭐
+                </motion.span>
+              </span>
+            </motion.button>
+          </a>
         </motion.div>
+
+        {/* Delivery Services */}
+        <DeliveryServices />
 
         {/* Stats */}
         <motion.div
-          className="flex justify-center items-center mt-12 text-sm text-gray-400"
+          className="flex justify-center items-center mt-8 text-sm text-gray-400"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.8 }}
+          transition={{ duration: 1, delay: 2.6 }}
         >
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4" />

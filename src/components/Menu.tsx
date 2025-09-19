@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { supabase, type MenuItem, type Category, type Promo } from '../lib/supabase';
+import DeliveryServices from './DeliveryServices';
 
 // Mobile Menu Item Component
 const MobileMenuItem = ({ 
@@ -373,6 +374,69 @@ const Menu = () => {
           <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
           Deliciously made with Canadian goodness, cooked to perfection, and served with care. Our menu is where great taste meets high standards.
           </p>
+          
+          {/* Delivery Services in Menu Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-8"
+          >
+            <div className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border border-slate-200/60 rounded-2xl p-6 shadow-sm backdrop-blur-sm max-w-4xl mx-auto">
+              <h4 className="text-lg font-semibold text-slate-800 mb-4 text-center">
+                🚚 Order for Delivery
+              </h4>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <a
+                  href="https://www.doordash.com/store/howdy-cafe-williams-lake-36009249"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 bg-red-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-red-700 transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <img src="/doordash.svg" alt="DoorDash" className="w-10 h-10 object-contain filter brightness-0 invert" />
+                  <span>Order on DoorDash</span>
+                </a>
+                <div className="relative flex items-center gap-3 bg-orange-500 text-white px-6 py-3 rounded-xl font-medium opacity-60 cursor-not-allowed shadow-lg">
+                  <img src="/Skip.svg" alt="Skip the Dishes" className="w-10 h-10 object-contain filter brightness-0 invert" />
+                  <span>Skip the Dishes</span>
+                  {/* Coming Soon Badge */}
+                  <div className="absolute -top-2 -right-2 z-20">
+                    <div className="relative">
+                      {/* Glowing background effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 rounded-full blur-sm opacity-75 animate-pulse"></div>
+                      
+                      {/* Main badge */}
+                      <div className="relative bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 text-black text-xs font-black px-3 py-1.5 rounded-full shadow-xl border-2 border-white/90 backdrop-blur-sm">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 bg-black rounded-full animate-pulse"></span>
+                          <span className="tracking-wider">SOON</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="relative flex items-center gap-3 bg-green-600 text-white px-6 py-3 rounded-xl font-medium opacity-60 cursor-not-allowed shadow-lg">
+                  <img src="/UberLogo.svg" alt="Uber Eats" className="w-10 h-10 object-contain filter brightness-0 invert" />
+                  <span>Uber Eats</span>
+                  {/* Coming Soon Badge */}
+                  <div className="absolute -top-2 -right-2 z-20">
+                    <div className="relative">
+                      {/* Glowing background effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 rounded-full blur-sm opacity-75 animate-pulse"></div>
+                      
+                      {/* Main badge */}
+                      <div className="relative bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 text-black text-xs font-black px-3 py-1.5 rounded-full shadow-xl border-2 border-white/90 backdrop-blur-sm">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 bg-black rounded-full animate-pulse"></span>
+                          <span className="tracking-wider">SOON</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
           
           {/* Photo Disclaimer */}
           <motion.div
