@@ -4,7 +4,6 @@ import { ExternalLink } from 'lucide-react';
 
 // Import SVG logos
 import DoorDashLogo from '/doordash.svg';
-import SkipLogo from '/Skip.svg';
 import UberLogo from '/UberLogo.svg';
 
 interface DeliveryService {
@@ -26,20 +25,12 @@ const deliveryServices: DeliveryService[] = [
     description: 'Order for delivery'
   },
   {
-    name: 'Skip the Dishes',
-    logo: SkipLogo,
-    url: '#', // Placeholder - will be updated when you provide the link
-    color: '#FF8000',
-    hoverColor: '#E65100',
-    description: 'Coming soon'
-  },
-  {
     name: 'Uber Eats',
     logo: UberLogo,
-    url: '#', // Placeholder - will be updated when you provide the link
+    url: 'https://www.ubereats.com/ca/store/howdy-cafe-700-midnight-dr-104/U4H9D3jiTgKf3Z_BDfyMeA',
     color: '#06C167',
     hoverColor: '#00A651',
-    description: 'Coming soon'
+    description: 'Order for delivery'
   }
 ];
 
